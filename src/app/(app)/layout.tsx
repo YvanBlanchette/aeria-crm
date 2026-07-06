@@ -2,10 +2,7 @@ import Link from "next/link";
 import { requireUser, destroySession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Logo from "@/components/logo";
-import { HiOutlineSquares2X2, HiOutlineUsers } from "react-icons/hi2";
-import { FaShip } from "react-icons/fa6";
-import { MdOutlineRoute } from "react-icons/md";
-import { FiSettings } from "react-icons/fi";
+import { NAV } from "@/lib/data/navigation";
 
 async function logout() {
   "use server";
@@ -13,18 +10,10 @@ async function logout() {
   redirect("/login");
 }
 
-const NAV = [
-  { href: "/dashboard", label: "Tableau de bord", icon: HiOutlineSquares2X2 },
-  { href: "/clients", label: "Clients", icon: HiOutlineUsers },
-  { href: "/bookings", label: "Réservations", icon: FaShip },
-  { href: "/itineraries", label: "Itinéraires", icon: MdOutlineRoute },
-  { href: "/settings", label: "Paramètres", icon: FiSettings },
-];
-
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
   return (
-    <div className="min-h-screen flex">
+    <div className="flex h-screen overflow-hidden">
       <aside className="w-60 shrink-0 bg-navy text-white flex flex-col">
         <div className="px-5 py-5 border-b border-navy-700">
           <Logo />

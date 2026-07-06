@@ -70,7 +70,7 @@ export default function LoginPage() {
               </div>
 
               {/* FEEDBACK */}
-              {state?.error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>}
+              {state?.error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 pyJai construit un petit module d'outil de generations de forfaits... je devrais l'insérer ou dans le code? on construit un dossier modules qqpart? Il va juste falloir ajuster les styles a ceux du socle et la logique (cetait un outils local) pour l'intégrer dans le socle.-2 text-sm text-red-700">{state.error}</p>}
 
               {/* SUBMIT */}
               <SubmitButton />
