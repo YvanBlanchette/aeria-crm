@@ -2,6 +2,10 @@ import Link from "next/link";
 import { requireUser, destroySession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Logo from "@/components/logo";
+import { HiOutlineSquares2X2, HiOutlineUsers } from "react-icons/hi2";
+import { FaShip } from "react-icons/fa6";
+import { MdOutlineRoute } from "react-icons/md";
+import { FiSettings } from "react-icons/fi";
 
 async function logout() {
   "use server";
@@ -10,12 +14,11 @@ async function logout() {
 }
 
 const NAV = [
-  { href: "/dashboard", label: "Tableau de bord", icon: "◧" },
-  { href: "/leads", label: "Prospects", icon: "◎" },
-  { href: "/clients", label: "Clients", icon: "◉" },
-  { href: "/bookings", label: "Réservations", icon: "⛴" },
-  { href: "/itineraries", label: "Itinéraires", icon: "⚓" },
-  { href: "/settings", label: "Paramètres", icon: "⚙" },
+  { href: "/dashboard", label: "Tableau de bord", icon: HiOutlineSquares2X2 },
+  { href: "/clients", label: "Clients", icon: HiOutlineUsers },
+  { href: "/bookings", label: "Réservations", icon: FaShip },
+  { href: "/itineraries", label: "Itinéraires", icon: MdOutlineRoute },
+  { href: "/settings", label: "Paramètres", icon: FiSettings },
 ];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -24,15 +27,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen flex">
       <aside className="w-60 shrink-0 bg-navy text-white flex flex-col">
         <div className="px-5 py-5 border-b border-navy-700">
-        <Logo />
+          <Logo />
         </div>
         <nav className="flex-1 p-3 space-y-1">
-          {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className="nav-link">
-              <span className="w-5 text-center" aria-hidden>{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
+          {NAV.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.href} href={item.href} className="nav-link">
+                <span className="w-5 text-center" aria-hidden>
+                  <Icon className="h-4 w-4 inline-block" />
+                </span>
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
         <div className="p-4 border-t border-navy-700">
           <p className="text-sm font-medium text-white truncate">{user.name}</p>

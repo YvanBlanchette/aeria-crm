@@ -1,0 +1,169 @@
+﻿/* ═══ COUCHE DE MARQUE — le seul CSS de l'outil ═══════════════════════════
+     Tout le reste du style est en classes Tailwind (voir lib/tailwind-utilities.min.css).
+     Ici : couleurs exactes, polices, et les états hover/focus que Tailwind v2
+     précompilé ne peut pas produire sur des couleurs personnalisées. */
+
+:root {
+	--marine: #0d2b45; /* bleu foncé : entêtes, titres */
+	--ecume: #f2f6f8; /* fond général de l'application */
+	--ligne: #d8e2e9; /* bordures et séparateurs */
+	--encre: #1c2b36; /* texte principal */
+	--sourdine: #5b7183; /* texte secondaire */
+	--lagon: #0e7c86; /* accent principal : boutons, totaux */
+	--lagon-fonce: #0a6a73; /* hover des boutons lagon */
+	--lagon-pale: #e2f1f2; /* fonds pâles lagon (badges, notes) */
+	--lagon-texte: #0a5a61; /* texte sur fond lagon pâle */
+	--laiton: #b07d2b; /* accent doré : encadrés TAAP */
+	--laiton-pale: #faf3e4; /* fond des encadrés dorés */
+	--brun: #6d4e1c; /* texte sur fond doré */
+	--alerte: #b3402a; /* rouge : pertes, erreurs, suppression */
+	--alerte-pale: #fbeae6; /* fond des alertes */
+	--ok: #2e7d4f; /* vert : confirmations */
+	--ciel: #9fc3d9; /* bleu pâle sur fond marine (sous-titres) */
+	--brume: #c8dbe8; /* onglets inactifs sur fond marine */
+	--neige: #fbfdfe; /* fonds très légèrement teintés */
+}
+/* Micro-reset (Tailwind utilities n'inclut pas le reset « preflight ») */
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+body {
+	font-family: "Public Sans", system-ui, sans-serif;
+	color: var(--encre);
+}
+/* Polices (Tailwind ne connaît pas nos familles précises) */
+.font-display {
+	font-family: "Fraunces", serif;
+}
+.mono {
+	font-family: "IBM Plex Mono", monospace;
+}
+/* Couleurs de marque — mêmes conventions de nom que Tailwind (bg-/text-/border-) */
+.bg-marine {
+	background-color: var(--marine);
+}
+.text-marine {
+	color: var(--marine);
+}
+.bg-ecume {
+	background-color: var(--ecume);
+}
+.bg-neige {
+	background-color: var(--neige);
+}
+.border-ligne {
+	border-color: var(--ligne);
+}
+.text-encre {
+	color: var(--encre);
+}
+.text-sourdine {
+	color: var(--sourdine);
+}
+.bg-lagon {
+	background-color: var(--lagon);
+}
+.text-lagon {
+	color: var(--lagon);
+}
+.bg-lagon-pale {
+	background-color: var(--lagon-pale);
+}
+.border-lagon {
+	border-color: var(--lagon);
+}
+.text-lagon-fonce {
+	color: var(--lagon-texte);
+}
+.bg-laiton {
+	background-color: var(--laiton);
+}
+.text-laiton {
+	color: var(--laiton);
+}
+.bg-laiton-pale {
+	background-color: var(--laiton-pale);
+}
+.border-laiton {
+	border-color: var(--laiton);
+}
+.text-brun {
+	color: var(--brun);
+}
+.bg-alerte {
+	background-color: var(--alerte);
+}
+.text-alerte {
+	color: var(--alerte);
+}
+.bg-alerte-pale {
+	background-color: var(--alerte-pale);
+}
+.border-alerte {
+	border-color: var(--alerte);
+}
+.bg-ok {
+	background-color: var(--ok);
+}
+.text-ok {
+	color: var(--ok);
+}
+.text-ciel {
+	color: var(--ciel);
+}
+.text-brume {
+	color: var(--brume);
+}
+/* États hover sur couleurs personnalisées (impossibles en Tailwind précompilé) */
+.hover-lagon-fonce:hover {
+	background-color: var(--lagon-fonce);
+	border-color: var(--lagon-fonce);
+}
+.hover-border-marine:hover {
+	border-color: var(--marine);
+}
+.hover-laiton:hover {
+	background-color: var(--laiton);
+	color: #fff;
+}
+.hover-alerte:hover {
+	background-color: var(--alerte);
+	color: #fff;
+}
+.hover-item:hover {
+	border-color: var(--lagon);
+	background-color: var(--lagon-pale);
+}
+/* Focus des champs de saisie */
+input:focus,
+textarea:focus,
+select:focus {
+	outline: 2px solid var(--lagon);
+	outline-offset: -1px;
+	border-color: var(--lagon);
+}
+/* Cases à cocher à l'accent lagon (accent-color absent de Tailwind v2) */
+input[type="checkbox"] {
+	accent-color: var(--lagon);
+}
+
+/* Logo de marque: evite les etirements/coupures selon la taille d'ecran */
+.brand-logo-wrap {
+	height: 44px;
+	max-width: 360px;
+}
+.brand-logo {
+	display: block;
+	height: 100%;
+	width: auto;
+	object-fit: contain;
+}
+
+@media (max-width: 768px) {
+	.brand-logo-wrap {
+		height: 36px;
+		max-width: 300px;
+	}
+}

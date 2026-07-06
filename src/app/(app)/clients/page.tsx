@@ -21,7 +21,16 @@ export default async function ClientsPage({
   };
 }) {
   await requireUser();
-  const view = searchParams.view === "archived" || searchParams.view === "all" ? searchParams.view : "active";
+  const settings = await prisma.agencySettings.findUnique({
+    where: { id: "default" },
+    select: { defaultClientView: true, passportAlertDays: true },
+  });
+  const defaultView =
+    settings?.defaultClientView === "archived" || settings?.defaultClientView === "all"
+      ? settings.defaultClientView
+      : "active";
+  const view = searchParams.view === "archived" || searchParams.view === "all" ? searchParams.view : defaultView;
+  const passportAlertDays = settings?.passportAlertDays ?? 180;
   const imported = Number(searchParams.imported ?? 0);
   const updated = Number(searchParams.updated ?? 0);
   const skipped = Number(searchParams.skipped ?? 0);
@@ -50,7 +59,7 @@ export default async function ClientsPage({
     phone: c.phone ?? "",
     passportNumber: c.passportNumber ?? "",
     passportExpiringSoon:
-      !!c.passportExpiry && c.passportExpiry < new Date(Date.now() + 1000 * 60 * 60 * 24 * 180),
+      !!c.passportExpiry && c.passportExpiry < new Date(Date.now() + 1000 * 60 * 60 * 24 * passportAlertDays),
     bookingsCount: c._count.bookings,
     updatedAtLabel: fmtDate(c.updatedAt),
     isArchived: !!c.archivedAt,

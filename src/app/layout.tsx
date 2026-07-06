@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ÆRIA CRM | CRM pour Agences de voyages",
-  description: "CRM pour agents de voyages spécialisés croisières",
+  title: "ÆRIA Voyages | CRM pour Agences de voyages",
+  description: "CRM pour agences de voyages spécialisés croisières",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

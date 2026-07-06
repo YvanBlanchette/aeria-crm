@@ -1,0 +1,2 @@
+Dans data/ :
+Rangez vos fichiers .sqlite dans ce dossier pour les garder ensemble.

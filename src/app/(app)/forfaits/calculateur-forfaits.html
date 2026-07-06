@@ -1,0 +1,110 @@
+﻿<!doctype html>
+<!-- ═══════════════════════════════════════════════════════════════════════════
+  CALCULATEUR DE FORFAITS CROISIÈRE + VOLS
+  Outil autonome. Aucune installation, aucun internet requis.
+
+  ── STRUCTURE DES DOSSIERS (100 % HORS LIGNE) ─────────────────────────────────
+  calculateur-forfaits/
+    calculateur-forfaits.html   ← ce fichier (à ouvrir dans Chrome ou Edge)
+    LISEZMOI.txt                ← mode d'emploi
+    data/                       ← rangez vos bases .sqlite ici (suggestion)
+    lib/                        ← toutes les dépendances :
+      xlsx.full.min.js            SheetJS → sommaire Excel
+      jspdf.umd.min.js            jsPDF → soumission client PDF
+      sql-wasm.js + sql-wasm.wasm sql.js → base SQLite
+      tailwind-utilities.min.css  TOUTES les classes Tailwind v2 (utilities)
+      fonts/                      polices Fraunces, Public Sans, IBM Plex Mono
+  ⚠ Le HTML doit rester à côté de lib/ (chemins relatifs).
+
+  ── STYLES : TAILWIND + COUCHE DE MARQUE ──────────────────────────────────────
+  Tout le style est fait avec des classes Tailwind directement dans le HTML et
+  dans les gabarits générés par le JavaScript (constantes CL dans le script).
+	Le fichier app/main.css est la « couche de marque » : uniquement ce que
+  Tailwind v2 précompilé NE PEUT PAS exprimer :
+    · nos couleurs exactes (.bg-marine, .text-lagon, .border-ligne, etc.)
+    · nos polices (.font-display = Fraunces, .mono = IBM Plex Mono)
+    · les états hover/focus sur ces couleurs personnalisées
+	► Pour changer une couleur de l'outil : modifier les variables :root dans app/main.css.
+  ► Pour ajuster une mise en page : modifier les classes Tailwind sur place
+    (référence : tailwindcss.com/docs — version 2). Aucune compilation requise.
+
+  ── STRUCTURE DU FICHIER HTML ─────────────────────────────────────────────────
+  1. <head>   : dépendances locales (lib/) + couche de marque
+  2. <body>   : squelette minimal + chargement des fragments de layout
+  3. app/fragments/*.js : HTML découpé en 3 gros blocs (accueil, header, pages)
+  4. app/main.js : toute la logique applicative (21 sections commentées)
+
+  ── ARCHITECTURE DES DONNÉES (3 niveaux) ──────────────────────────────────────
+  NIVEAU 1 — Fichier .sqlite sur le disque (SOURCE DE VÉRITÉ)
+    · Chrome/Edge en local (API File System Access) ; écrit ~4 s après chaque modif
+    · Tables : meta, constantes, dossiers, courant (travail en cours)
+  NIVEAU 2 — Cache navigateur (localStorage, ou window.storage dans Claude)
+    · Copie de secours ; clés : constantes-forfaits, dossiers-forfaits, autosave-forfaits
+  NIVEAU 3 — Exports manuels (CSV = 1 dossier, .sqlite = tout)
+
+  ── MODIFICATIONS COURANTES ───────────────────────────────────────────────────
+  · Couleurs / polices ...................... variables :root ci-dessous
+  · Valeurs par défaut des constantes ....... chercher « DEFAULTS »
+  · Formule du prix par personne ............ fonction cabinCalc()
+  · Logique markup TAAP / perte absorbée .... fonction computeBase()
+  · Contenu du sommaire Excel ............... fonction genExcel()
+  · Contenu de la soumission client PDF ..... fonction genPDF()
+  · Catégories de cabines ................... constante CABINES
+  · Gabarits/classes des éléments générés ... constante CL (début du script)
+  · Champs sauvegardés dans un dossier ...... constante PAGES_STATE
+  · Structure visuelle (accueil/header/pages) app/fragments/*.fragment.js
+  · Assemblage des fragments ................ app/fragments/render-layout.js
+  · Délais de sauvegarde automatique ........ chercher « 45000 » (cache)
+                                              et « 4000 » (fichier .sqlite)
+═══════════════════════════════════════════════════════════════════════════ -->
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>Calculateur de forfaits croisière</title>
+		<!-- Dépendances LOCALES (dossier lib/) — l'outil fonctionne 100 % hors ligne. -->
+		<link
+			rel="stylesheet"
+			href="lib/fonts/fonts.css"
+		/>
+		<!-- polices hors ligne -->
+		<link
+			rel="stylesheet"
+			href="lib/tailwind-utilities.min.css"
+		/>
+		<!-- toutes les classes Tailwind v2 -->
+		<script src="lib/xlsx.full.min.js"></script>
+		<!-- SheetJS : Excel -->
+		<script src="lib/jspdf.umd.min.js"></script>
+		<!-- jsPDF : PDF client -->
+		<script src="lib/sql-wasm.js"></script>
+		<!-- sql.js : base SQLite -->
+		<link
+			rel="stylesheet"
+			href="app/main.css"
+		/>
+	</head>
+	<body class="bg-ecume min-h-screen">
+		<!-- =====================================================================
+LAYOUT ASSEMBLÉ DYNAMIQUEMENT
+- app/fragments/accueil.fragment.js : écran d'accueil
+- app/fragments/header.fragment.js  : en-tête + onglets
+- app/fragments/pages.fragment.js   : les 5 pages de l'outil
+- app/fragments/render-layout.js    : assemble les 3 fragments dans #app-shell
+
+IMPORTANT : app/main.js doit rester APRÈS render-layout.js pour que tous
+les éléments (ids, boutons, sections) existent avant le binding JS.
+===================================================================== -->
+		<div id="app-shell"></div>
+
+		<script src="app/fragments/accueil.fragment.js"></script>
+		<script src="app/fragments/header.fragment.js"></script>
+		<script src="app/fragments/pages.fragment.js"></script>
+		<script src="app/fragments/render-layout.js"></script>
+		<script src="app/aeria-logo-data.js"></script>
+		<script src="app/main.js"></script>
+	</body>
+</html>

@@ -1,0 +1,43 @@
+═══════════════════════════════════════════════════════════════════
+  CALCULATEUR DE FORFAITS CROISIÈRE + VOLS — MODE D'EMPLOI
+═══════════════════════════════════════════════════════════════════
+
+DÉMARRAGE
+  1. Décompressez ce dossier où vous voulez (Bureau, Documents,
+     idéalement dans OneDrive/Dropbox pour la sauvegarde nuage).
+  2. Ouvrez « calculateur-forfaits.html » avec CHROME ou EDGE
+     (clic droit → Ouvrir avec, si nécessaire).
+  3. À l'écran d'accueil, cliquez « Créer ma base de données… »
+     et enregistrez le fichier .sqlite dans le dossier data/.
+  Tout fonctionne HORS LIGNE : aucun internet requis, jamais.
+
+STRUCTURE (à ne pas séparer)
+  calculateur-forfaits.html   l'outil — c'est lui qu'on ouvre
+  data/                       vos bases .sqlite (suggestion de rangement)
+  lib/                        les librairies et polices — NE PAS déplacer,
+                              le HTML les charge par chemins relatifs
+
+VOS DONNÉES
+  · Écrites automatiquement dans votre fichier .sqlite quelques
+    secondes après chaque modification (pastille verte, onglet
+    Paramètres). Effacer les données de navigation n'y touche pas.
+  · Copie de secours : Paramètres → « Exporter une copie (.sqlite) ».
+  · Un dossier seul : onglet Dossiers → « Exporter en CSV ».
+
+MODIFIER LE CODE
+  · Tout est dans calculateur-forfaits.html, commenté en français.
+    Le guide en tête du fichier indique où faire chaque changement.
+  · Classes Tailwind : lib/tailwind-utilities.min.css contient TOUTES
+    les classes standard de Tailwind v2 (flex, grid, p-4, mt-2,
+    text-red-600, rounded-lg, etc.). Utilisez-les directement dans le
+    HTML — aucune compilation, jamais. (Limite : pas de valeurs
+    arbitraires du genre w-[137px], propres à Tailwind v3.)
+  · Mettre à jour une librairie : remplacez le fichier dans lib/ par
+    la nouvelle version (npm ou site officiel), même nom de fichier.
+
+DÉPANNAGE
+  · « Librairie non chargée » → le dossier lib/ a été séparé du HTML.
+  · Excel/PDF/base ne fonctionnent pas → ouvrez avec Chrome ou Edge.
+  · Base non retrouvée après un nettoyage du navigateur → Paramètres
+    → « Connecter une base… » et repointez votre fichier .sqlite :
+    rien n'est perdu.

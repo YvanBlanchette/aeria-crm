@@ -57,6 +57,7 @@ model User {
   leads        Lead[]
   bookings     Booking[]
   activities   Activity[]
+  settingsLogs SettingsAuditLog[]
   createdAt    DateTime  @default(now())
 }
 
@@ -213,4 +214,36 @@ model Booking {
   userId         String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+}
+
+model AgencySettings {
+  id                   String   @id @default("default")
+  agencyName           String   @default("ÆRIA Voyages")
+  legalName            String?
+  contactEmail         String?
+  contactPhone         String?
+  website              String?
+  address              String?
+  timezone             String   @default("America/Toronto")
+  defaultCurrency      String   @default("CAD")
+  defaultLanguage      String   @default("fr")
+  bookingPrefix        String   @default("CR")
+  defaultDepositPct    Int      @default(25)
+  balanceDueDays       Int      @default(45)
+  passportAlertDays    Int      @default(180)
+  defaultClientView    String   @default("active")
+  autoArchiveLostLeads Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model SettingsAuditLog {
+  id          String   @id @default(cuid())
+  actorUser   User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorUserId String?
+  action      String
+  target      String?
+  summary     String
+  metadata    Json?
+  createdAt   DateTime @default(now())
 }
