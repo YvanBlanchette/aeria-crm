@@ -11,20 +11,32 @@ export default async function ClientsPage({
   searchParams,
 }: {
   searchParams: {
+    view?: string;
     imported?: string;
     updated?: string;
     skipped?: string;
     importError?: string;
     preview?: string;
+    archived?: string;
   };
 }) {
   await requireUser();
+  const view = searchParams.view === "archived" || searchParams.view === "all" ? searchParams.view : "active";
   const imported = Number(searchParams.imported ?? 0);
   const updated = Number(searchParams.updated ?? 0);
   const skipped = Number(searchParams.skipped ?? 0);
   const isPreview = searchParams.preview === "1";
   const hasImportResult = searchParams.imported !== undefined || searchParams.updated !== undefined || searchParams.skipped !== undefined;
+
+  const where =
+    view === "archived"
+      ? { archivedAt: { not: null as Date | null } }
+      : view === "all"
+        ? undefined
+        : { archivedAt: null as Date | null };
+
   const clients = await prisma.client.findMany({
+    where,
     orderBy: { updatedAt: "desc" },
     include: { _count: { select: { bookings: true } } },
     take: 1000,
@@ -41,6 +53,7 @@ export default async function ClientsPage({
       !!c.passportExpiry && c.passportExpiry < new Date(Date.now() + 1000 * 60 * 60 * 24 * 180),
     bookingsCount: c._count.bookings,
     updatedAtLabel: fmtDate(c.updatedAt),
+    isArchived: !!c.archivedAt,
   }));
 
   return (
@@ -59,13 +72,25 @@ export default async function ClientsPage({
         </p>
       )}
 
+      {searchParams.archived === "1" && (
+        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+          Contact archive avec succes. Vous pouvez le restaurer a tout moment.
+        </p>
+      )}
+
+      <div className="flex items-center gap-2 flex-wrap">
+        <Link href="/clients?view=active" className={`badge ${view === "active" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Actifs</Link>
+        <Link href="/clients?view=archived" className={`badge ${view === "archived" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Archives</Link>
+        <Link href="/clients?view=all" className={`badge ${view === "all" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Tous</Link>
+      </div>
+
       {hasImportResult && (
         <p className={`text-sm rounded-lg px-4 py-3 border ${isPreview ? "text-ocean-700 bg-ocean-50 border-ocean-200" : "text-emerald-800 bg-emerald-50 border-emerald-200"}`}>
           {isPreview ? "Aperçu import" : "Import terminé"} : {imported} créé(s), {updated} mis à jour, {skipped} ignoré(s).
         </p>
       )}
 
-      <form action={importClientsCsv} className="card p-4 space-y-3" encType="multipart/form-data">
+      <form action={importClientsCsv} className="card p-4 space-y-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="font-semibold text-navy">Importer des clients (CSV)</h2>
           <p className="text-xs text-slate-500">Format détecté : Colonnes CRM existant (Contact principal, Courriel principal, etc.)</p>

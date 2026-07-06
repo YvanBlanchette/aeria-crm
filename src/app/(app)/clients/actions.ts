@@ -11,6 +11,7 @@ function parseClientForm(formData: FormData) {
 		const v = String(formData.get(k) ?? "").trim();
 		return v === "" ? null : v;
 	};
+	const bool = (k: string) => formData.get(k) === "on";
 	const date = (k: string) => {
 		const v = str(k);
 		return v ? new Date(v) : null;
@@ -18,14 +19,44 @@ function parseClientForm(formData: FormData) {
 	return {
 		firstName: String(formData.get("firstName") ?? "").trim(),
 		lastName: String(formData.get("lastName") ?? "").trim(),
+		preferredName: str("preferredName"),
+		middleName: str("middleName"),
 		email: str("email"),
+		secondaryEmail: str("secondaryEmail"),
 		phone: str("phone"),
+		secondaryPhone: str("secondaryPhone"),
+		preferredLanguage: str("preferredLanguage"),
+		preferredContactMethod: str("preferredContactMethod"),
+		emailOptIn: bool("emailOptIn"),
+		smsOptIn: bool("smsOptIn"),
 		dateOfBirth: date("dateOfBirth"),
 		nationality: str("nationality"),
 		passportNumber: str("passportNumber"),
 		passportExpiry: date("passportExpiry"),
+		passportIssueCountry: str("passportIssueCountry"),
+		passportIssueDate: date("passportIssueDate"),
+		passportPlaceOfBirth: str("passportPlaceOfBirth"),
+		knownTravelerNumber: str("knownTravelerNumber"),
+		tsaPrecheckNumber: str("tsaPrecheckNumber"),
+		redressNumber: str("redressNumber"),
+		cruiseLoyaltyPrograms: str("cruiseLoyaltyPrograms"),
+		airlineLoyaltyPrograms: str("airlineLoyaltyPrograms"),
+		hotelLoyaltyPrograms: str("hotelLoyaltyPrograms"),
+		emergencyContactName: str("emergencyContactName"),
+		emergencyContactRelation: str("emergencyContactRelation"),
+		emergencyContactPhone: str("emergencyContactPhone"),
+		emergencyContactEmail: str("emergencyContactEmail"),
 		address: str("address"),
+		billingCompany: str("billingCompany"),
+		billingTaxNumber: str("billingTaxNumber"),
+		billingAddress: str("billingAddress"),
 		preferences: str("preferences"),
+		roomPreferences: str("roomPreferences"),
+		dietaryRestrictions: str("dietaryRestrictions"),
+		accessibilityNeeds: str("accessibilityNeeds"),
+		specialOccasions: str("specialOccasions"),
+		travelInsuranceProvider: str("travelInsuranceProvider"),
+		travelInsurancePolicyNumber: str("travelInsurancePolicyNumber"),
 		notes: str("notes"),
 	};
 }
@@ -50,11 +81,17 @@ export async function updateClient(id: string, formData: FormData) {
 
 export async function deleteClient(id: string) {
 	await requireUser();
-	const bookings = await prisma.booking.count({ where: { clientId: id } });
-	if (bookings > 0) redirect(`/clients/${id}?error=has-bookings`);
-	await prisma.client.delete({ where: { id } });
+	await prisma.client.update({ where: { id }, data: { archivedAt: new Date() } });
 	revalidatePath("/clients");
-	redirect("/clients");
+	redirect("/clients?archived=1");
+}
+
+export async function restoreClient(id: string) {
+	await requireUser();
+	await prisma.client.update({ where: { id }, data: { archivedAt: null } });
+	revalidatePath("/clients");
+	revalidatePath(`/clients/${id}`);
+	redirect(`/clients/${id}?restored=1`);
 }
 
 function parseDate(value: string | null) {
@@ -199,6 +236,7 @@ export async function importClientsCsv(formData: FormData) {
 					dateOfBirth: current.dateOfBirth ?? birthDate,
 					passportNumber: current.passportNumber ?? passport,
 					notes: current.notes ?? (importNotes || null),
+					archivedAt: null,
 				},
 			});
 		}

@@ -19,7 +19,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="text-3xl mb-2" aria-hidden>⚓</div>
-          <h1 className="text-2xl font-bold text-white">Cap CRM</h1>
+          <h1 className="text-2xl font-bold text-white">ÆRIA CRM</h1>
           <p className="text-slate-400 text-sm mt-1">Votre agence croisières, à bon port.</p>
         </div>
         <form action={formAction} className="card p-6 space-y-4">

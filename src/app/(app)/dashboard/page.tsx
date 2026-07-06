@@ -122,7 +122,7 @@ export default async function Dashboard() {
           </p>
         ) : (
           <table className="w-full">
-            <thead className="bg-slate-50">
+            <thead className="bg-navy">
               <tr>
                 <th className="table-th">Référence</th>
                 <th className="table-th">Client</th>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUser, destroySession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Logo from "@/components/logo";
 
 async function logout() {
   "use server";
@@ -23,10 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen flex">
       <aside className="w-60 shrink-0 bg-navy text-white flex flex-col">
         <div className="px-5 py-5 border-b border-navy-700">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="text-xl" aria-hidden>⚓</span>
-            <span className="font-bold text-lg tracking-tight">Cap CRM</span>
-          </Link>
+        <Logo />
         </div>
         <nav className="flex-1 p-3 space-y-1">
           {NAV.map((item) => (

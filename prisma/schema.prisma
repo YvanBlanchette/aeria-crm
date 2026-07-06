@@ -64,16 +64,47 @@ model Client {
   id             String    @id @default(cuid())
   firstName      String
   lastName       String
+  preferredName  String?
+  middleName     String?
   email          String?
+  secondaryEmail String?
   phone          String?
+  secondaryPhone String?
+  preferredLanguage String?
+  preferredContactMethod String?
+  emailOptIn     Boolean   @default(false)
+  smsOptIn       Boolean   @default(false)
   dateOfBirth    DateTime?
   nationality    String?
   passportNumber String?
   passportExpiry DateTime?
+  passportIssueCountry String?
+  passportIssueDate DateTime?
+  passportPlaceOfBirth String?
+  knownTravelerNumber String?
+  tsaPrecheckNumber String?
+  redressNumber String?
+  cruiseLoyaltyPrograms String?
+  airlineLoyaltyPrograms String?
+  hotelLoyaltyPrograms String?
+  emergencyContactName String?
+  emergencyContactRelation String?
+  emergencyContactPhone String?
+  emergencyContactEmail String?
   address        String?
+  billingCompany String?
+  billingTaxNumber String?
+  billingAddress String?
   // Préférences croisière : cabine favorite, compagnies préférées, régimes, mobilité...
   preferences    String?
+  roomPreferences String?
+  dietaryRestrictions String?
+  accessibilityNeeds String?
+  specialOccasions String?
+  travelInsuranceProvider String?
+  travelInsurancePolicyNumber String?
   notes          String?
+  archivedAt     DateTime?
   leads          Lead[]
   bookings       Booking[]
   createdAt      DateTime  @default(now())

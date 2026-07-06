@@ -13,6 +13,7 @@ type ClientRow = {
   passportExpiringSoon: boolean;
   bookingsCount: number;
   updatedAtLabel: string;
+  isArchived: boolean;
 };
 
 const COLUMNS: FilterableColumn<ClientRow>[] = [
@@ -23,6 +24,7 @@ const COLUMNS: FilterableColumn<ClientRow>[] = [
     renderCell: (row) => (
       <Link href={`/clients/${row.id}`} className="font-medium text-navy hover:text-ocean">
         {row.firstName} {row.lastName}
+        {row.isArchived && <span className="badge bg-slate-200 text-slate-700 ml-2">Archive</span>}
       </Link>
     ),
   },
@@ -58,14 +60,14 @@ const COLUMNS: FilterableColumn<ClientRow>[] = [
     id: "bookingsCount",
     header: "Croisieres",
     getValue: (row) => row.bookingsCount,
-    filterType: "select",
-    filterOptions: ["0", "1", "2", "3", "4", "5"],
+    searchable: false,
   },
   {
     id: "updatedAtLabel",
     header: "Mis a jour",
     getValue: (row) => row.updatedAtLabel,
     cellClassName: "text-slate-500",
+    searchable: false,
   },
 ];
 
@@ -76,6 +78,7 @@ export function ClientsTable({ rows }: { rows: ClientRow[] }) {
       columns={COLUMNS}
       getRowKey={(row) => row.id}
       emptyMessage="Aucun client. Ajoutez votre premier client pour commencer."
+      globalSearchPlaceholder="Rechercher nom, courriel, telephone, passeport..."
     />
   );
 }

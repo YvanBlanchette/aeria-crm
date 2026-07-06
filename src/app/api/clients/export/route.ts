@@ -47,7 +47,7 @@ export async function GET() {
 				contact,
 				c.email ?? "",
 				c.phone ?? "",
-				"Oui",
+				c.archivedAt ? "Non" : "Oui",
 				"Client",
 				fmtDateTime(c.createdAt),
 				c.dateOfBirth ? c.dateOfBirth.toISOString().slice(0, 10) : "",

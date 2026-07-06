@@ -45,7 +45,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: { s
           <p className="p-6 text-sm text-slate-500">Aucune réservation dans cette vue.</p>
         ) : (
           <table className="w-full">
-            <thead className="bg-slate-50">
+            <thead className="bg-navy">
               <tr>
                 <th className="table-th">Référence</th>
                 <th className="table-th">Client</th>
