@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  AGENT
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUOTED
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum ActivityType {
+  NOTE
+  CALL
+  EMAIL
+  MEETING
+}
+
+enum BookingStatus {
+  OPTION
+  CONFIRMED
+  PAID
+  CANCELLED
+  COMPLETED
+}
+
+enum CabinType {
+  INTERIOR
+  OCEANVIEW
+  BALCONY
+  SUITE
+}
+
+enum ItinerarySource {
+  MANUAL
+  API
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  role         Role      @default(AGENT)
+  leads        Lead[]
+  bookings     Booking[]
+  activities   Activity[]
+  createdAt    DateTime  @default(now())
+}
+
+model Client {
+  id             String    @id @default(cuid())
+  firstName      String
+  lastName       String
+  email          String?
+  phone          String?
+  dateOfBirth    DateTime?
+  nationality    String?
+  passportNumber String?
+  passportExpiry DateTime?
+  address        String?
+  // Préférences croisière : cabine favorite, compagnies préférées, régimes, mobilité...
+  preferences    String?
+  notes          String?
+  leads          Lead[]
+  bookings       Booking[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Lead {
+  id           String     @id @default(cuid())
+  title        String
+  status       LeadStatus @default(NEW)
+  source       String? // Référence, site web, salon, appel entrant...
+  destination  String?
+  travelPeriod String? // "Été 2027", "Décembre 2026"...
+  budget       Decimal?   @db.Decimal(10, 2)
+  contactName  String?
+  contactEmail String?
+  contactPhone String?
+  notes        String?
+  client       Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  clientId     String?
+  assignedTo   User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId       String?
+  activities   Activity[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  type      ActivityType @default(NOTE)
+  content   String
+  lead      Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId    String
+  author    User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String?
+  createdAt DateTime     @default(now())
+}
+
+model CruiseLine {
+  id    String @id @default(cuid())
+  name  String @unique
+  ships Ship[]
+}
+
+model Ship {
+  id           String      @id @default(cuid())
+  name         String
+  capacity     Int?
+  cruiseLine   CruiseLine  @relation(fields: [cruiseLineId], references: [id], onDelete: Cascade)
+  cruiseLineId String
+  itineraries  Itinerary[]
+}
+
+model Itinerary {
+  id            String          @id @default(cuid())
+  name          String
+  nights        Int
+  departurePort String
+  arrivalPort   String?
+  description   String?
+  // MANUAL = créé à la main dans le builder ; API = importé d'un fournisseur externe
+  source        ItinerarySource @default(MANUAL)
+  externalId    String? // Identifiant chez le fournisseur (Traveltek, Widgety...)
+  providerName  String? // Nom du fournisseur d'origine
+  ship          Ship?           @relation(fields: [shipId], references: [id], onDelete: SetNull)
+  shipId        String?
+  days          ItineraryDay[]
+  bookings      Booking[]
+  createdAt     DateTime        @default(now())
+}
+
+model ItineraryDay {
+  id          String    @id @default(cuid())
+  dayNumber   Int
+  port        String // "Journée en mer" si isSeaDay
+  country     String?
+  arrival     String? // "08:00"
+  departure   String? // "18:00"
+  isSeaDay    Boolean   @default(false)
+  notes       String? // Excursions suggérées, conseils...
+  itinerary   Itinerary @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  itineraryId String
+
+  @@unique([itineraryId, dayNumber])
+}
+
+model Booking {
+  id             String        @id @default(cuid())
+  reference      String        @unique
+  status         BookingStatus @default(OPTION)
+  sailingDate    DateTime
+  returnDate     DateTime?
+  cabinType      CabinType     @default(INTERIOR)
+  cabinNumber    String?
+  passengers     Int           @default(2)
+  totalPrice     Decimal       @db.Decimal(10, 2)
+  deposit        Decimal?      @db.Decimal(10, 2)
+  commission     Decimal?      @db.Decimal(10, 2)
+  balanceDueDate DateTime?
+  notes          String?
+  client         Client        @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  clientId       String
+  itinerary      Itinerary?    @relation(fields: [itineraryId], references: [id], onDelete: SetNull)
+  itineraryId    String?
+  agent          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId         String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
