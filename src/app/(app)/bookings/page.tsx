@@ -25,11 +25,6 @@ export default async function BookingsPage({ searchParams }: { searchParams: { s
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-2xl font-bold text-navy">Réservations</h1>
-        <Link href="/bookings/new" className="btn-primary">+ Nouvelle réservation</Link>
-      </div>
-
       <div className="flex gap-2 flex-wrap">
         <Link href="/bookings" className={`badge ${!status ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Toutes</Link>
         {Object.entries(BOOKING_STATUS_LABELS).map(([v, l]) => (

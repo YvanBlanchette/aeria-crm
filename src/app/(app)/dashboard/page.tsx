@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { fmtDate, fmtMoney, LEAD_STATUS_LABELS, BOOKING_STATUS_LABELS } from "@/lib/format";
+import { PassportReveal } from "@/components/PassportReveal";
 
 export const dynamic = "force-dynamic";
 
@@ -304,7 +305,7 @@ export default async function Dashboard() {
                     <Link href={`/clients/${c.id}`} className="text-sm font-medium text-navy hover:text-ocean truncate block">
                       {c.firstName} {c.lastName}
                     </Link>
-                    <p className="text-xs text-slate-500">{c.passportNumber ?? "Passeport à confirmer"}</p>
+                    <PassportReveal clientId={c.id} hasValue={!!c.passportNumber} compact />
                   </div>
                   <span className="text-sm text-red-700 shrink-0">{fmtDate(c.passportExpiry)}</span>
                 </li>

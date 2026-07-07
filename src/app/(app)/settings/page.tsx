@@ -10,6 +10,7 @@ import {
   resetUserPassword,
 } from "./actions";
 import { ResetUserPasswordModal } from "@/components/ResetUserPasswordModal";
+import DatasetsUploader from "@/components/DatasetsUploader";
 
 export const dynamic = "force-dynamic";
 
@@ -320,6 +321,16 @@ export default async function SettingsPage({
             </p>
             <p className="text-sm text-slate-500 mt-3">Fournisseur actif : Catalogue interne (itinéraires manuels).</p>
           </section>
+
+          {user.role === "ADMIN" && (
+            <section className="card p-5">
+              <h2 className="font-semibold text-navy mb-2">Datasets JSON</h2>
+              <p className="text-sm text-slate-600 mb-4">
+                Uploadez une nouvelle version d&apos;un ou plusieurs fichiers JSON pour remplacer les données en base immédiatement.
+              </p>
+              <DatasetsUploader />
+            </section>
+          )}
         </div>
       </div>
     </div>

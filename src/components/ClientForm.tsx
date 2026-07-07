@@ -1,6 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import worldCountries from "@/lib/data/world-countries.json";
+
+const NATIONALITIES = [
+  "",
+  ...worldCountries.countries
+    .map((country) => country.name)
+    .filter((name): name is string => !!name)
+    .sort((a, b) => a.localeCompare(b)),
+];
 
 type ClientLike = {
   firstName?: string;
@@ -113,43 +122,12 @@ export function ClientForm({
   };
 
   return (
-    <form action={action} className="card p-6 space-y-5 max-w-5xl">
+    <form action={action} className="card p-6 space-y-5">
       {/* CORE IDENTITY */}
       <section className="space-y-4">
-        <h2 className="font-semibold text-navy">Profil principal</h2>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label className="label" htmlFor="firstName">Prenom *</label>
-            <input id="firstName" name="firstName" required defaultValue={client?.firstName} className="input" />
-          </div>
-          <div>
-            <label className="label" htmlFor="lastName">Nom *</label>
-            <input id="lastName" name="lastName" required defaultValue={client?.lastName} className="input" />
-          </div>
-          <div>
-            <label className="label" htmlFor="email">Courriel principal</label>
-            <input id="email" name="email" type="email" defaultValue={client?.email ?? ""} className="input" />
-          </div>
-          <div>
-            <label className="label" htmlFor="phone">Telephone principal</label>
-            <input id="phone" name="phone" defaultValue={client?.phone ?? ""} className="input" />
-          </div>
-          <div>
-            <label className="label" htmlFor="dateOfBirth">Date de naissance</label>
-            <input id="dateOfBirth" name="dateOfBirth" type="date" defaultValue={d(client?.dateOfBirth)} className="input" />
-          </div>
-          <div>
-            <label className="label" htmlFor="nationality">Nationalite</label>
-            <input id="nationality" name="nationality" defaultValue={client?.nationality ?? ""} className="input" />
-          </div>
-        </div>
-      </section>
-
-      {/* OPTIONAL SWITCHBOARD */}
-      <section className="space-y-2">
-        <h3 className="font-semibold text-navy">Sections avancees (optionnel)</h3>
-        <p className="text-xs text-slate-500">Active uniquement les blocs utiles pour ce client.</p>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-navy">Profil principal</h2>
+          <div className="flex gap-2 flex-wrap">
           <button type="button" className={`btn-secondary text-xs ${sections.identity ? "ring-2 ring-ocean/30" : ""}`} onClick={() => toggleSection("identity")}>Identite & contact</button>
           <button type="button" className={`btn-secondary text-xs ${sections.passport ? "ring-2 ring-ocean/30" : ""}`} onClick={() => toggleSection("passport")}>Passeport+</button>
           <button type="button" className={`btn-secondary text-xs ${sections.loyalty ? "ring-2 ring-ocean/30" : ""}`} onClick={() => toggleSection("loyalty")}>Programmes fidelite</button>
@@ -158,37 +136,25 @@ export function ClientForm({
           <button type="button" className={`btn-secondary text-xs ${sections.billing ? "ring-2 ring-ocean/30" : ""}`} onClick={() => toggleSection("billing")}>Facturation</button>
           <button type="button" className={`btn-secondary text-xs ${sections.insurance ? "ring-2 ring-ocean/30" : ""}`} onClick={() => toggleSection("insurance")}>Assurance</button>
         </div>
-      </section>
-
-      {/* PASSPORT BASE */}
-      <section className="space-y-4">
-        <h2 className="font-semibold text-navy">Document de voyage principal</h2>
+        </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="label" htmlFor="passportNumber">Numero de passeport</label>
-            <input id="passportNumber" name="passportNumber" defaultValue={client?.passportNumber ?? ""} className="input" />
+            <label className="label" htmlFor="firstName">Prenom *</label>
+            <input id="firstName" name="firstName" required defaultValue={client?.firstName} className="input" placeholder="Inscrire le prénom" />
           </div>
           <div>
-            <label className="label" htmlFor="passportExpiry">Expiration du passeport</label>
-            <input id="passportExpiry" name="passportExpiry" type="date" defaultValue={d(client?.passportExpiry)} className="input" />
+            <label className="label" htmlFor="lastName">Nom *</label>
+            <input id="lastName" name="lastName" required defaultValue={client?.lastName} className="input" placeholder="Inscrire le nom de famille" />
           </div>
-        </div>
-      </section>
-
-      {/* IDENTITY SECTION */}
-      {sections.identity && (
-        <section className="space-y-4 border border-slate-200 rounded-lg p-4 bg-slate-50/50">
-          <h3 className="font-semibold text-navy">Identite & canaux de contact</h3>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="label" htmlFor="preferredName">Prenom prefere</label>
-              <input id="preferredName" name="preferredName" defaultValue={client?.preferredName ?? ""} className="input" />
-            </div>
-            <div>
-              <label className="label" htmlFor="middleName">Deuxieme prenom</label>
-              <input id="middleName" name="middleName" defaultValue={client?.middleName ?? ""} className="input" />
-            </div>
-            <div>
+          <div>
+            <label className="label" htmlFor="email">Courriel principal *</label>
+            <input id="email" name="email" type="email" required defaultValue={client?.email ?? ""} className="input" placeholder="Inscrire le courriel principal" />
+          </div>
+          <div>
+            <label className="label" htmlFor="phone">Telephone principal</label>
+            <input id="phone" name="phone" defaultValue={client?.phone ?? ""} className="input" placeholder="Inscrire le téléphone principal" />
+          </div>
+                      <div>
               <label className="label" htmlFor="secondaryEmail">Courriel secondaire</label>
               <input id="secondaryEmail" name="secondaryEmail" type="email" defaultValue={client?.secondaryEmail ?? ""} className="input" />
             </div>
@@ -196,7 +162,26 @@ export function ClientForm({
               <label className="label" htmlFor="secondaryPhone">Telephone secondaire</label>
               <input id="secondaryPhone" name="secondaryPhone" defaultValue={client?.secondaryPhone ?? ""} className="input" />
             </div>
-            <div>
+
+          <div>
+            <label className="label" htmlFor="dateOfBirth">Date de naissance</label>
+            <input id="dateOfBirth" name="dateOfBirth" type="date" defaultValue={d(client?.dateOfBirth)} className="input" />
+          </div>
+          <div>
+            <label className="label" htmlFor="nationality">Nationalite</label>
+            <select id="nationality" name="nationality" defaultValue={client?.nationality ?? ""} className="input">
+              {NATIONALITIES.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="col-span-2">
+            <label className="label" htmlFor="address">Adresse principale</label>
+            <input id="address" name="address" defaultValue={client?.address ?? ""} className="input" />
+        </div>
+                    <div>
               <label className="label" htmlFor="preferredLanguage">Langue preferee</label>
               <select id="preferredLanguage" name="preferredLanguage" defaultValue={client?.preferredLanguage ?? ""} className="input">
                 <option value="">-</option>
@@ -225,21 +210,31 @@ export function ClientForm({
               Consentement communications marketing par SMS
             </label>
           </div>
-        </section>
-      )}
+      </section>
 
-      {/* PASSPORT PLUS SECTION */}
+      {/* PASSPORT BASE */}
       {sections.passport && (
-        <section className="space-y-4 border border-slate-200 rounded-lg p-4 bg-slate-50/50">
-          <h3 className="font-semibold text-navy">Passeport+, securite aeroport</h3>
+        <section className="space-y-4">
+          <hr className="border-slate-200 my-4" />
+          <h2 className="font-semibold text-navy">Document de voyage principal</h2>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="label" htmlFor="passportNumber">Numero de passeport</label>
+              <input id="passportNumber" name="passportNumber" defaultValue={client?.passportNumber ?? ""} className="input" />
+            </div>
+            <div>
+              <label className="label" htmlFor="passportIssueDate">Date d'emission du passeport</label>
+              <input id="passportIssueDate" name="passportIssueDate" type="date" defaultValue={d(client?.passportIssueDate)} className="input" />
+            </div>
+          </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="label" htmlFor="passportIssueCountry">Pays d'emission passeport</label>
               <input id="passportIssueCountry" name="passportIssueCountry" defaultValue={client?.passportIssueCountry ?? ""} className="input" />
             </div>
             <div>
-              <label className="label" htmlFor="passportIssueDate">Date d'emission</label>
-              <input id="passportIssueDate" name="passportIssueDate" type="date" defaultValue={d(client?.passportIssueDate)} className="input" />
+              <label className="label" htmlFor="passportExpiry">Date d'expiration du passeport</label>
+              <input id="passportExpiry" name="passportExpiry" type="date" defaultValue={d(client?.passportExpiry)} className="input" />
             </div>
             <div>
               <label className="label" htmlFor="passportPlaceOfBirth">Lieu de naissance (doc)</label>
@@ -256,6 +251,31 @@ export function ClientForm({
             <div>
               <label className="label" htmlFor="redressNumber">Redress number</label>
               <input id="redressNumber" name="redressNumber" defaultValue={client?.redressNumber ?? ""} className="input" />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* OPTIONAL SWITCHBOARD */}
+      <section className="space-y-2">
+        <h3 className="font-semibold text-navy">Sections avancees (optionnel)</h3>
+        <p className="text-xs text-slate-500">Active uniquement les blocs utiles pour ce client.</p>
+      </section>
+
+
+
+      {/* IDENTITY SECTION */}
+      {sections.identity && (
+        <section className="space-y-4 border border-slate-200 rounded-lg p-4 bg-slate-50/50">
+          <h3 className="font-semibold text-navy">Identite & canaux de contact</h3>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="label" htmlFor="preferredName">Prenom prefere</label>
+              <input id="preferredName" name="preferredName" defaultValue={client?.preferredName ?? ""} className="input" />
+            </div>
+            <div>
+              <label className="label" htmlFor="middleName">Deuxieme prenom</label>
+              <input id="middleName" name="middleName" defaultValue={client?.middleName ?? ""} className="input" />
             </div>
           </div>
         </section>
@@ -377,10 +397,6 @@ export function ClientForm({
 
       {/* ADDRESS AND NOTES */}
       <section className="space-y-4">
-        <div>
-          <label className="label" htmlFor="address">Adresse principale</label>
-          <input id="address" name="address" defaultValue={client?.address ?? ""} className="input" />
-        </div>
         <div>
           <label className="label" htmlFor="notes">Notes internes</label>
           <textarea id="notes" name="notes" rows={3} defaultValue={client?.notes ?? ""} className="input" />

@@ -24,11 +24,6 @@ export default async function LeadsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-2xl font-bold text-navy">Pipeline des prospects</h1>
-        <Link href="/leads/new" className="btn-primary">+ Nouveau prospect</Link>
-      </div>
-
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 items-start">
         {COLUMNS.map((col) => {
           const items = leads.filter((l) => l.status === col);

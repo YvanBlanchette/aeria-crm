@@ -36,6 +36,68 @@ enum BookingStatus {
   COMPLETED
 }
 
+enum SegmentType {
+  CRUISE
+  FLIGHT
+  HOTEL
+  TRANSFER
+  ACTIVITY
+  INSURANCE
+  FEE
+  OTHER
+}
+
+enum SegmentStatus {
+  DRAFT
+  OPTION
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  PAID
+  FAILED
+  REFUNDED
+  VOIDED
+}
+
+enum PaymentType {
+  DEPOSIT
+  INTERIM
+  FINAL
+  REFUND
+  ADJUSTMENT
+}
+
+enum PaymentMethod {
+  CARD
+  BANK_TRANSFER
+  CASH
+  CHECK
+  OTHER
+}
+
+enum DocumentVisibility {
+  INTERNAL
+  CLIENT
+}
+
+enum ChargeType {
+  SERVICE_FEE
+  TAX
+  PORT_FEE
+  GRATUITY
+  INSURANCE_PREMIUM
+  EXCURSION
+  ADDON
+  DISCOUNT
+  ADJUSTMENT
+  OTHER
+}
+
 enum CabinType {
   INTERIOR
   OCEANVIEW
@@ -46,6 +108,15 @@ enum CabinType {
 enum ItinerarySource {
   MANUAL
   API
+}
+
+model StaticDataset {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  sourceFile String?
+  payload    Json
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
 }
 
 model User {
@@ -60,6 +131,7 @@ model User {
   settingsLogs SettingsAuditLog[]
   forfaitWorkspace ForfaitWorkspace?
   forfaitDossiers  ForfaitDossier[]
+  bookingDocuments BookingDocument[]
   createdAt    DateTime  @default(now())
 }
 
@@ -198,6 +270,18 @@ model Booking {
   id             String        @id @default(cuid())
   reference      String        @unique
   status         BookingStatus @default(OPTION)
+  packageType    String?
+  destinationMain String?
+  supplierMain   String?
+  currency       String        @default("CAD")
+  internalFileNumber String?
+  clientNotes    String?
+  internalNotes  String?
+  globalDepartureDate DateTime?
+  globalReturnDate DateTime?
+  serviceFees    Decimal?      @db.Decimal(10, 2)
+  totalNet       Decimal?      @db.Decimal(10, 2)
+  totalCommission Decimal?     @db.Decimal(10, 2)
   sailingDate    DateTime
   returnDate     DateTime?
   cabinType      CabinType     @default(INTERIOR)
@@ -214,8 +298,279 @@ model Booking {
   itineraryId    String?
   agent          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   userId         String?
+  segments       BookingSegment[]
+  payments       BookingPayment[]
+  paymentSchedules BookingPaymentSchedule[]
+  documents      BookingDocument[]
+  charges        BookingCharge[]
+  commissions    BookingCommission[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+
+  @@index([clientId, status, sailingDate])
+  @@index([destinationMain])
+  @@index([internalFileNumber])
+}
+
+model BookingSegment {
+  id             String        @id @default(cuid())
+  booking        Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId      String
+  type           SegmentType
+  status         SegmentStatus @default(DRAFT)
+  title          String?
+  sortOrder      Int           @default(0)
+  supplierName   String?
+  startAt        DateTime?
+  endAt          DateTime?
+  confirmationNumber String?
+  includedInPackage Boolean    @default(true)
+  optionalForClient Boolean    @default(false)
+  clientVisible  Boolean       @default(true)
+  currency       String?
+  baseAmount     Decimal?      @db.Decimal(10, 2)
+  taxesAmount    Decimal?      @db.Decimal(10, 2)
+  feesAmount     Decimal?      @db.Decimal(10, 2)
+  totalAmount    Decimal?      @db.Decimal(10, 2)
+  internalNotes  String?
+  clientNotes    String?
+  extra          Json?
+  cruiseDetails  CruiseSegment?
+  flightDetails  FlightSegment?
+  hotelDetails   HotelSegment?
+  transferDetails TransferSegment?
+  activityDetails ActivitySegment?
+  insuranceDetails InsuranceSegment?
+  charges        BookingCharge[]
+  commissions    BookingCommission[]
+  documents      BookingDocument[]
+  paymentAllocations BookingPaymentAllocation[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([bookingId, sortOrder])
+  @@index([type, status])
+}
+
+model CruiseSegment {
+  segment        BookingSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  segmentId      String         @id
+  cruiseLine     String?
+  shipName       String?
+  itineraryName  String?
+  portsOfCall    Json?
+  embarkationPort String?
+  disembarkationPort String?
+  cabinCategory  String?
+  cabinNumber    String?
+  deck           String?
+  occupancy      Int?
+  cruiseBookingNumber String?
+  wholesalerSupplier String?
+  beveragePackage Boolean      @default(false)
+  wifiPackage    Boolean       @default(false)
+  specialtyDining Boolean      @default(false)
+  onboardCredit  Decimal?      @db.Decimal(10, 2)
+  excursionCredit Decimal?     @db.Decimal(10, 2)
+  prepaidGratuities Decimal?   @db.Decimal(10, 2)
+  portTaxesFees  Decimal?      @db.Decimal(10, 2)
+  otherInclusions String?
+}
+
+model FlightSegment {
+  segment        BookingSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  segmentId      String         @id
+  airlineName    String?
+  cabinClass     String?
+  baggageIncluded String?
+  seatSelection  String?
+  pnr            String?
+  notes          String?
+  legs           FlightLeg[]
+}
+
+model FlightLeg {
+  id             String        @id @default(cuid())
+  flightSegment  FlightSegment @relation(fields: [flightSegmentId], references: [segmentId], onDelete: Cascade)
+  flightSegmentId String
+  sortOrder      Int           @default(0)
+  flightNumber   String?
+  departureAirport String?
+  arrivalAirport String?
+  departureAt    DateTime?
+  arrivalAt      DateTime?
+  stopoverNotes  String?
+
+  @@index([flightSegmentId, sortOrder])
+}
+
+model HotelSegment {
+  segment        BookingSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  segmentId      String         @id
+  hotelName      String?
+  address        String?
+  city           String?
+  checkInDate    DateTime?
+  checkOutDate   DateTime?
+  roomType       String?
+  occupancy      Int?
+  mealPlan       String?
+  confirmationNumber String?
+  resortFeesTaxes Decimal?     @db.Decimal(10, 2)
+  notes          String?
+}
+
+model TransferSegment {
+  segment        BookingSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  segmentId      String         @id
+  transferType   String?
+  provider       String?
+  transferDate   DateTime?
+  transferTime   String?
+  pickupLocation String?
+  dropoffLocation String?
+  confirmationNumber String?
+  includedInPackage Boolean     @default(true)
+  notes          String?
+}
+
+model ActivitySegment {
+  segment        BookingSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  segmentId      String         @id
+  activityName   String?
+  provider       String?
+  activityDate   DateTime?
+  activityTime   String?
+  departureLocation String?
+  duration       String?
+  optional       Boolean        @default(false)
+  price          Decimal?       @db.Decimal(10, 2)
+  confirmationNumber String?
+  notes          String?
+}
+
+model InsuranceSegment {
+  segment        BookingSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  segmentId      String         @id
+  provider       String?
+  coverageType   String?
+  policyNumber   String?
+  purchaseDate   DateTime?
+  coveredAmount  Decimal?       @db.Decimal(10, 2)
+  premium        Decimal?       @db.Decimal(10, 2)
+  notes          String?
+}
+
+model BookingPayment {
+  id             String        @id @default(cuid())
+  booking        Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId      String
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String
+  paidAt         DateTime?
+  method         PaymentMethod?
+  status         PaymentStatus @default(PENDING)
+  type           PaymentType   @default(INTERIM)
+  isFinalPayment Boolean       @default(false)
+  finalDueDate   DateTime?
+  externalReference String?
+  notes          String?
+  allocations    BookingPaymentAllocation[]
+  documents      BookingDocument[]
+  createdAt      DateTime      @default(now())
+
+  @@index([bookingId, status, paidAt])
+}
+
+model BookingPaymentSchedule {
+  id             String        @id @default(cuid())
+  booking        Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId      String
+  label          String?
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String
+  dueDate        DateTime
+  status         PaymentStatus @default(PENDING)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([bookingId, dueDate])
+  @@index([status, dueDate])
+}
+
+model BookingPaymentAllocation {
+  id             String        @id @default(cuid())
+  payment        BookingPayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  paymentId      String
+  segment        BookingSegment? @relation(fields: [segmentId], references: [id], onDelete: SetNull)
+  segmentId      String?
+  amount         Decimal       @db.Decimal(10, 2)
+  createdAt      DateTime      @default(now())
+
+  @@index([paymentId])
+  @@index([segmentId])
+}
+
+model BookingCharge {
+  id             String        @id @default(cuid())
+  booking        Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId      String
+  segment        BookingSegment? @relation(fields: [segmentId], references: [id], onDelete: SetNull)
+  segmentId      String?
+  type           ChargeType    @default(OTHER)
+  label          String
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String
+  taxable        Boolean       @default(false)
+  includedInTotal Boolean      @default(true)
+  notes          String?
+  createdAt      DateTime      @default(now())
+
+  @@index([bookingId, type])
+  @@index([segmentId])
+}
+
+model BookingCommission {
+  id             String        @id @default(cuid())
+  booking        Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId      String
+  segment        BookingSegment? @relation(fields: [segmentId], references: [id], onDelete: SetNull)
+  segmentId      String?
+  supplier       String?
+  ratePercent    Decimal?      @db.Decimal(5, 2)
+  amount         Decimal?      @db.Decimal(10, 2)
+  currency       String?
+  payableOn      DateTime?
+  notes          String?
+  createdAt      DateTime      @default(now())
+
+  @@index([bookingId, payableOn])
+  @@index([segmentId])
+}
+
+model BookingDocument {
+  id             String            @id @default(cuid())
+  booking        Booking           @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId      String
+  segment        BookingSegment?   @relation(fields: [segmentId], references: [id], onDelete: SetNull)
+  segmentId      String?
+  payment        BookingPayment?   @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  paymentId      String?
+  uploadedBy     User?             @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  uploadedById   String?
+  documentType   String?
+  fileName       String
+  mimeType       String?
+  storageKey     String?
+  fileUrl        String?
+  visibility     DocumentVisibility @default(INTERNAL)
+  notes          String?
+  createdAt      DateTime          @default(now())
+
+  @@index([bookingId, createdAt])
+  @@index([segmentId])
+  @@index([paymentId])
 }
 
 model AgencySettings {

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { getSessionUserId } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 const DEFAULTS = {
 	admin: 150,
@@ -53,13 +56,27 @@ async function bootstrap(userId: string) {
 	};
 }
 
+async function requireApiUser() {
+	const userId = await getSessionUserId();
+	if (!userId) return null;
+
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { id: true, name: true, email: true, role: true },
+	});
+
+	return user;
+}
+
 export async function GET() {
-	const me = await requireUser();
+	const me = await requireApiUser();
+	if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 	return NextResponse.json(await bootstrap(me.id));
 }
 
 export async function POST(request: Request) {
-	const me = await requireUser();
+	const me = await requireApiUser();
+	if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 	const body = (await request.json()) as {
 		action?: string;
 		constants?: unknown;
@@ -143,4 +160,6 @@ export async function POST(request: Request) {
 			dossier: { id: newId, nom: `${source.name} (copie)`, ts: new Date().toISOString(), state: source.state },
 		});
 	}
+
+	return NextResponse.json({ ok: false, error: "Action non supportée" }, { status: 400 });
 }

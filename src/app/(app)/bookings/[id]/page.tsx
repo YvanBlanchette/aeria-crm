@@ -19,6 +19,19 @@ export default async function BookingDetail({
       client: true,
       agent: { select: { name: true } },
       itinerary: { include: { ship: { include: { cruiseLine: true } }, days: { orderBy: { dayNumber: "asc" } } } },
+      payments: { orderBy: { createdAt: "asc" } },
+      paymentSchedules: { orderBy: { dueDate: "asc" } },
+      segments: {
+        orderBy: { sortOrder: "asc" },
+        include: {
+          cruiseDetails: true,
+          flightDetails: true,
+          hotelDetails: true,
+          transferDetails: true,
+          activityDetails: true,
+          insuranceDetails: true,
+        },
+      },
     },
   });
   if (!booking) notFound();
@@ -105,6 +118,61 @@ export default async function BookingDetail({
                 <p className="text-sm whitespace-pre-wrap">{booking.notes}</p>
               </section>
             )}
+
+            <section className="card p-5 space-y-3">
+              <h2 className="font-semibold text-navy">Segments</h2>
+              {booking.segments.length === 0 ? (
+                <p className="text-sm text-slate-500">Aucun segment ajouté.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {booking.segments.map((s, idx) => (
+                    <li key={s.id} className="rounded-lg border border-slate-200 p-3 text-sm">
+                      <p className="font-medium text-navy">{idx + 1}. {s.title || s.type}</p>
+                      <p className="text-slate-600">
+                        {s.supplierName || "Fournisseur à préciser"}
+                        {s.startAt ? ` · ${fmtDate(s.startAt)}` : ""}
+                        {s.endAt ? ` → ${fmtDate(s.endAt)}` : ""}
+                      </p>
+                      {(s.totalAmount || s.baseAmount) && (
+                        <p className="text-slate-700 mt-1">Montant: {fmtMoney(s.totalAmount ?? s.baseAmount)}</p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section className="card p-5 space-y-3">
+              <h2 className="font-semibold text-navy">Paiements</h2>
+              {booking.payments.length === 0 ? (
+                <p className="text-sm text-slate-500">Aucun paiement enregistré.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {booking.payments.map((p) => (
+                    <li key={p.id} className="text-sm rounded-lg border border-slate-200 p-3">
+                      <p className="font-medium text-navy">{fmtMoney(p.amount)} · {p.type}</p>
+                      <p className="text-slate-600">{p.paidAt ? fmtDate(p.paidAt) : "Date à confirmer"} · {p.status}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <section className="card p-5 space-y-3">
+              <h2 className="font-semibold text-navy">Échéances</h2>
+              {booking.paymentSchedules.length === 0 ? (
+                <p className="text-sm text-slate-500">Aucune échéance définie.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {booking.paymentSchedules.map((s) => (
+                    <li key={s.id} className="text-sm rounded-lg border border-slate-200 p-3">
+                      <p className="font-medium text-navy">{s.label || "Échéance"} · {fmtMoney(s.amount)}</p>
+                      <p className="text-slate-600">{fmtDate(s.dueDate)} · {s.status}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
           </div>
 
           <section className="card p-5 lg:col-span-2">

@@ -29,6 +29,7 @@ function compareValues(a: unknown, b: unknown) {
 }
 
 export function FilterableTable<T>({
+  className,
   rows,
   columns,
   getRowKey,
@@ -40,6 +41,7 @@ export function FilterableTable<T>({
   getRowKey: (row: T) => string;
   emptyMessage: string;
   globalSearchPlaceholder?: string;
+  className?: string;
 }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<{ columnId: string; direction: SortDirection } | null>(null);
@@ -82,7 +84,8 @@ export function FilterableTable<T>({
   };
 
   return (
-    <div className="card overflow-hidden">
+    <div className={`card overflow-hidden ${className}`}>
+      {/* TABLE TOOLBAR */}
       <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2">
         <p className="text-sm text-slate-600">{displayedRows.length} resultat(s)</p>
         <div className="flex items-center gap-2">
@@ -108,9 +111,10 @@ export function FilterableTable<T>({
       {rows.length === 0 ? (
         <p className="p-6 text-sm text-slate-500">{emptyMessage}</p>
       ) : (
-        <div className="overflow-x-auto flex flex-col max-h-[80vh]">
-          <table className="w-full flex-shrink-0">
-            <thead className="bg-navy border-b border-navy-700 sticky top-0 z-10">
+        <div className="max-h-[80vh] overflow-auto">
+          {/* TABLE CONTENT */}
+          <table className="w-full">
+            <thead className="sticky top-0 z-10 bg-navy border-b border-navy-700">
               <tr>
                 {columns.map((col) => {
                   return (
@@ -128,30 +132,26 @@ export function FilterableTable<T>({
                 })}
               </tr>
             </thead>
-          </table>
-          <div className="overflow-y-auto flex-1">
-            <table className="w-full">
-              <tbody className="divide-y divide-slate-100">
-                {displayedRows.length === 0 ? (
-                  <tr>
-                    <td className="table-td text-slate-500" colSpan={columns.length}>
-                      Aucun resultat pour cette recherche.
-                    </td>
+            <tbody className="divide-y divide-slate-100">
+              {displayedRows.length === 0 ? (
+                <tr>
+                  <td className="table-td text-slate-500" colSpan={columns.length}>
+                    Aucun resultat pour cette recherche.
+                  </td>
+                </tr>
+              ) : (
+                displayedRows.map((row, index) => (
+                  <tr key={getRowKey(row)} className="hover:bg-slate-50">
+                    {columns.map((col) => (
+                      <td key={col.id} className={`table-td ${col.cellClassName ?? ""} ${index % 2 === 0 ? "bg-slate-100" : ""}`}>
+                        {col.renderCell ? col.renderCell(row) : String(col.getValue(row) ?? "-")}
+                      </td>
+                    ))}
                   </tr>
-                ) : (
-                  displayedRows.map((row, index) => (
-                    <tr key={getRowKey(row)} className="hover:bg-slate-50">
-                      {columns.map((col) => (
-                        <td key={col.id} className={`table-td ${col.cellClassName ?? ""} ${index % 2 === 0 ? "bg-slate-100" : ""}`}>
-                          {col.renderCell ? col.renderCell(row) : String(col.getValue(row) ?? "-")}
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

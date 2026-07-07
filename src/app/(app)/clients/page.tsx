@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { fmtDate } from "@/lib/format";
 import { ClientsContent } from "@/components/ClientsContent";
+import { deleteClient, restoreClient } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,7 @@ export default async function ClientsPage({
 
   const clients = await prisma.client.findMany({
     where,
-    orderBy: { updatedAt: "desc" },
+    orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     include: { _count: { select: { bookings: true } } },
     take: 1000,
   });
@@ -55,12 +56,9 @@ export default async function ClientsPage({
     lastName: c.lastName,
     email: c.email ?? "",
     phone: c.phone ?? "",
-    passportNumber: c.passportNumber ?? "",
-    passportExpiringSoon:
-      !!c.passportExpiry && c.passportExpiry < new Date(Date.now() + 1000 * 60 * 60 * 24 * passportAlertDays),
-    bookingsCount: c._count.bookings,
+    hasPassportNumber: !!c.passportNumber,
+    passportExpiry: c.passportExpiry ? c.passportExpiry.toISOString() : "",
     updatedAtLabel: fmtDate(c.updatedAt),
-    isArchived: !!c.archivedAt,
   }));
 
   return (
@@ -68,6 +66,8 @@ export default async function ClientsPage({
       searchParams={searchParams}
       rows={rows}
       view={view}
+      archiveAction={deleteClient}
+      restoreAction={restoreClient}
     />
   );
 }

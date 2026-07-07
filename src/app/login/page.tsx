@@ -27,24 +27,24 @@ export default function LoginPage() {
             Plateforme interne
           </p>
           <h1 className="mt-5 text-4xl font-bold leading-tight">
-            Pilotez vos ventes croisiere avec precision.
+            Naviguez vos ventes croisière avec précision.
           </h1>
           <p className="mt-4 max-w-md text-white/80">
-            Accedez a votre cockpit AERIA pour suivre clients, reservations, paiements et performance agence.
+            Accédez à votre cockpit AERIA pour suivre clients, réservations, paiements et performance agence.
           </p>
 
           <ul className="mt-8 space-y-3 text-sm text-white/90">
             <li className="flex items-start gap-2">
               <FiShield className="mt-0.5 shrink-0" />
-              Espace securise avec session chiffree et controle des acces.
+              Espace sécurisé avec session chiffrée et contrôle des accès.
             </li>
             <li className="flex items-start gap-2">
               <FiTrendingUp className="mt-0.5 shrink-0" />
-              Vue centralisee des opportunites, departs et encaissements.
+              Vue centralisée des opportunités, départs et encaissements.
             </li>
             <li className="flex items-start gap-2">
               <FiCheckCircle className="mt-0.5 shrink-0" />
-              Process collaboratif pour equipes agences et operations.
+              Process collaboratif pour équipes agences et opérations.
             </li>
           </ul>
         </section>
@@ -56,7 +56,7 @@ export default function LoginPage() {
               <Logo variant="black" href="/login" className="justify-center" />
             </div>
             <h2 className="text-center text-xl font-semibold text-navy">Connexion</h2>
-            <p className="mt-1 text-center text-sm text-slate-500">Entrez vos identifiants pour acceder au CRM.</p>
+            <p className="mt-1 text-center text-sm text-slate-500">Entrez vos identifiants pour accéder au CRM.</p>
 
             <form action={formAction} className="mt-5 space-y-4">
               {/* CREDENTIALS */}
@@ -70,7 +70,7 @@ export default function LoginPage() {
               </div>
 
               {/* FEEDBACK */}
-              {state?.error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 pyJai construit un petit module d'outil de generations de forfaits... je devrais l'insérer ou dans le code? on construit un dossier modules qqpart? Il va juste falloir ajuster les styles a ceux du socle et la logique (cetait un outils local) pour l'intégrer dans le socle.-2 text-sm text-red-700">{state.error}</p>}
+              {state?.error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>}
 
               {/* SUBMIT */}
               <SubmitButton />

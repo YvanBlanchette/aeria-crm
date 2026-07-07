@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { fmtDate, fmtMoney, BOOKING_STATUS_LABELS } from "@/lib/format";
+import { decryptPassportNumber } from "@/lib/passport";
 import { updateClient, deleteClient, restoreClient } from "../actions";
 import { ClientForm } from "@/components/ClientForm";
 import { ConfirmActionForm } from "@/components/ConfirmActionForm";
+import { PassportReveal } from "@/components/PassportReveal";
 
 export const dynamic = "force-dynamic";
 
@@ -36,9 +38,13 @@ export default async function ClientDetail({
   const hasPreferences = !!(client.roomPreferences || client.dietaryRestrictions || client.accessibilityNeeds || client.specialOccasions);
   const hasBilling = !!(client.billingCompany || client.billingTaxNumber || client.billingAddress);
   const hasInsurance = !!(client.travelInsuranceProvider || client.travelInsurancePolicyNumber);
+  const clientForForm = {
+    ...client,
+    passportNumber: decryptPassportNumber(client.passportNumber),
+  };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 overflow-y-auto">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <Link href="/clients" className="text-sm text-slate-500 hover:text-ocean">← Clients</Link>
@@ -78,7 +84,7 @@ export default async function ClientDetail({
       )}
 
       {editing ? (
-        <ClientForm client={client} action={updateAction} submitLabel="Enregistrer" />
+        <ClientForm client={clientForForm} action={updateAction} submitLabel="Enregistrer" />
       ) : (
         <div className="grid lg:grid-cols-3 gap-5">
           <section className="card p-5 space-y-3">
@@ -102,7 +108,10 @@ export default async function ClientDetail({
             <h2 className="font-semibold text-navy">Documents de voyage</h2>
             <dl className="text-sm space-y-2">
               <div><dt className="label">Nationalité</dt><dd>{client.nationality ?? "—"}</dd></div>
-              <div><dt className="label">Passeport</dt><dd>{client.passportNumber ?? "—"}</dd></div>
+              <div>
+                <dt className="label">Passeport</dt>
+                <dd><PassportReveal clientId={client.id} hasValue={!!client.passportNumber} /></dd>
+              </div>
               <div><dt className="label">Pays d'emission</dt><dd>{client.passportIssueCountry ?? "—"}</dd></div>
               <div><dt className="label">Date d'emission</dt><dd>{fmtDate(client.passportIssueDate)}</dd></div>
               <div><dt className="label">Lieu de naissance</dt><dd>{client.passportPlaceOfBirth ?? "—"}</dd></div>

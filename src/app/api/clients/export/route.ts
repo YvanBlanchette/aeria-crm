@@ -1,5 +1,6 @@
 import { getSessionUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { decryptPassportNumber } from "@/lib/passport";
 
 function esc(v: unknown) {
 	const s = (v ?? "").toString();
@@ -51,7 +52,7 @@ export async function GET() {
 				"Client",
 				fmtDateTime(c.createdAt),
 				c.dateOfBirth ? c.dateOfBirth.toISOString().slice(0, 10) : "",
-				c.passportNumber ?? "",
+				decryptPassportNumber(c.passportNumber) ?? "",
 			]
 				.map(esc)
 				.join(","),

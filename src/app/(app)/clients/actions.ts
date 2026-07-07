@@ -1,10 +1,12 @@
 "use server";
 
+import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parse } from "csv-parse/sync";
 import { prisma } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { getSessionUserId, requireUser } from "@/lib/auth";
+import { decryptPassportNumber, encryptPassportNumber } from "@/lib/passport";
 
 function parseClientForm(formData: FormData) {
 	const str = (k: string) => {
@@ -31,7 +33,7 @@ function parseClientForm(formData: FormData) {
 		smsOptIn: bool("smsOptIn"),
 		dateOfBirth: date("dateOfBirth"),
 		nationality: str("nationality"),
-		passportNumber: str("passportNumber"),
+		passportNumber: encryptPassportNumber(str("passportNumber")),
 		passportExpiry: date("passportExpiry"),
 		passportIssueCountry: str("passportIssueCountry"),
 		passportIssueDate: date("passportIssueDate"),
@@ -212,7 +214,7 @@ export async function importClientsCsv(formData: FormData) {
 						email,
 						phone,
 						dateOfBirth: birthDate,
-						passportNumber: passport,
+						passportNumber: encryptPassportNumber(passport),
 						notes: importNotes || null,
 					},
 				});
@@ -234,7 +236,7 @@ export async function importClientsCsv(formData: FormData) {
 					email: current.email ?? email,
 					phone: current.phone ?? phone,
 					dateOfBirth: current.dateOfBirth ?? birthDate,
-					passportNumber: current.passportNumber ?? passport,
+					passportNumber: current.passportNumber ?? encryptPassportNumber(passport),
 					notes: current.notes ?? (importNotes || null),
 					archivedAt: null,
 				},
@@ -249,4 +251,46 @@ export async function importClientsCsv(formData: FormData) {
 
 	revalidatePath("/clients");
 	redirect(`/clients?imported=${created}&updated=${updated}&skipped=${skipped}`);
+}
+
+export async function revealClientPassport(clientId: string, formData: FormData) {
+	await requireUser();
+
+	const password = String(formData.get("password") ?? "");
+	if (!password) {
+		return { error: "Mot de passe requis.", passportNumber: null as string | null };
+	}
+
+	const userId = await getSessionUserId();
+	if (!userId) {
+		return { error: "Session expirée.", passportNumber: null as string | null };
+	}
+
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { passwordHash: true },
+	});
+
+	if (!user) {
+		return { error: "Utilisateur introuvable.", passportNumber: null as string | null };
+	}
+
+	const valid = await bcrypt.compare(password, user.passwordHash);
+	if (!valid) {
+		return { error: "Mot de passe incorrect.", passportNumber: null as string | null };
+	}
+
+	const client = await prisma.client.findUnique({
+		where: { id: clientId },
+		select: { passportNumber: true },
+	});
+
+	if (!client?.passportNumber) {
+		return { error: "Passeport non renseigné.", passportNumber: null as string | null };
+	}
+
+	return {
+		error: null,
+		passportNumber: decryptPassportNumber(client.passportNumber),
+	};
 }

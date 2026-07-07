@@ -10,10 +10,14 @@ export function ClientsContent({
   searchParams,
   rows,
   view,
+  archiveAction,
+  restoreAction,
 }: {
   searchParams: any;
   rows: any[];
   view: string;
+  archiveAction: (id: string, formData: FormData) => void | Promise<void>;
+  restoreAction: (id: string) => void | Promise<void>;
 }) {
   const [showImport, setShowImport] = useState(false);
   const imported = Number(searchParams.imported ?? 0);
@@ -23,17 +27,22 @@ export function ClientsContent({
   const hasImportResult = searchParams.imported !== undefined || searchParams.updated !== undefined || searchParams.skipped !== undefined;
 
   return (
-    <div className="space-y-5">
+    <>
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-2xl font-bold text-navy">Clients</h1>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link href="/clients?view=active" className={`badge ${view === "active" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Actifs</Link>
+          <Link href="/clients?view=archived" className={`badge ${view === "archived" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Archives</Link>
+          <Link href="/clients?view=all" className={`badge ${view === "all" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Tous</Link>
+        </div>
+        
         <div className="flex items-center gap-2 flex-wrap">
           <ClientsImportButton
             showImport={showImport}
             onToggle={() => setShowImport(!showImport)}
-          />
+            />
           <a href="/api/clients/export" className="btn-secondary">Exporter CSV</a>
-          <Link href="/clients/new" className="btn-primary">+ Nouveau client</Link>
         </div>
+        
       </div>
 
       {searchParams.importError === "file" && (
@@ -51,11 +60,7 @@ export function ClientsContent({
       {/* IMPORT CARD */}
       <ClientsImportCard show={showImport} />
 
-      <div className="flex items-center gap-2 flex-wrap">
-        <Link href="/clients?view=active" className={`badge ${view === "active" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Actifs</Link>
-        <Link href="/clients?view=archived" className={`badge ${view === "archived" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Archives</Link>
-        <Link href="/clients?view=all" className={`badge ${view === "all" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Tous</Link>
-      </div>
+
 
       {hasImportResult && (
         <p className={`text-sm rounded-lg px-4 py-3 border ${isPreview ? "text-ocean-700 bg-ocean-50 border-ocean-200" : "text-emerald-800 bg-emerald-50 border-emerald-200"}`}>
@@ -63,7 +68,7 @@ export function ClientsContent({
         </p>
       )}
 
-      <ClientsTable rows={rows} />
-    </div>
+      <ClientsTable rows={rows} archiveAction={archiveAction} restoreAction={restoreAction} className="h-[calc(100vh-200px)]" />
+    </>
   );
 }
