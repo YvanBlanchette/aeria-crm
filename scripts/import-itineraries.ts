@@ -148,7 +148,7 @@ export async function importItineraries(csvPathInput?: string): Promise<ImportSu
   let itinerariesCreated = 0;
   let itinerariesUpdated = 0;
 
-  for (const [externalId, itineraryRows] of grouped) {
+  for (const [externalId, itineraryRows] of Array.from(grouped.entries())) {
     if (!itineraryRows.length) continue;
 
     const first = itineraryRows[0];
