@@ -252,7 +252,7 @@ export default async function ItinerariesPage({
   const availableNightsValues = new Set(availableNights.map((item) => item.nights));
   const nightSelectOptions = NIGHTS_PRESETS.filter((preset) => {
     if (!preset.value) return availableNightsValues.size > 0 || nightsPreset === "";
-    const hasMatch = [...availableNightsValues].some((n) => {
+    const hasMatch = Array.from(availableNightsValues).some((n) => {
       if (preset.min !== undefined && n < preset.min) return false;
       if (preset.max !== undefined && n > preset.max) return false;
       return true;
