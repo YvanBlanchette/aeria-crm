@@ -30,21 +30,30 @@ export default async function LeadsPage() {
           return (
             <div key={col} className={`card border-t-4 ${COLUMN_ACCENT[col]}`}>
               <div className="px-3 py-2.5 flex items-center justify-between">
-                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-600">{LEAD_STATUS_LABELS[col]}</h2>
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  {LEAD_STATUS_LABELS[col]}
+                </h2>
                 <span className="text-xs font-bold text-slate-400">{items.length}</span>
               </div>
               <div className="px-2 pb-2 space-y-2">
                 {items.length === 0 && <p className="px-1 pb-2 text-xs text-slate-400">Vide</p>}
                 {items.map((l) => (
-                  <Link key={l.id} href={`/leads/${l.id}`}
-                    className="block rounded-lg border border-slate-200 bg-white p-3 hover:border-ocean transition-colors">
+                  <Link
+                    key={l.id}
+                    href={`/leads/${l.id}`}
+                    className="block rounded-lg border border-slate-200 bg-white p-3 hover:border-ocean transition-colors"
+                  >
                     <p className="text-sm font-medium text-navy leading-snug">{l.title}</p>
                     <p className="text-xs text-slate-500 mt-1">
-                      {l.client ? `${l.client.firstName} ${l.client.lastName}` : l.contactName ?? "Contact à définir"}
+                      {l.client
+                        ? `${l.client.firstName} ${l.client.lastName}`
+                        : (l.contactName ?? "Contact à définir")}
                     </p>
                     <div className="flex items-center justify-between mt-2 text-xs text-slate-500">
                       <span>{l.destination ?? "—"}</span>
-                      <span className="font-medium text-navy">{l.budget ? fmtMoney(l.budget) : ""}</span>
+                      <span className="font-medium text-navy">
+                        {l.budget ? fmtMoney(l.budget) : ""}
+                      </span>
                     </div>
                   </Link>
                 ))}

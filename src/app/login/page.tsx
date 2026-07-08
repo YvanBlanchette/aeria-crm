@@ -30,7 +30,8 @@ export default function LoginPage() {
             Naviguez vos ventes croisière avec précision.
           </h1>
           <p className="mt-4 max-w-md text-white/80">
-            Accédez à votre cockpit AERIA pour suivre clients, réservations, paiements et performance agence.
+            Accédez à votre cockpit AERIA pour suivre clients, réservations, paiements et
+            performance agence.
           </p>
 
           <ul className="mt-8 space-y-3 text-sm text-white/90">
@@ -56,28 +57,57 @@ export default function LoginPage() {
               <Logo variant="black" href="/login" className="justify-center" />
             </div>
             <h2 className="text-center text-xl font-semibold text-navy">Connexion</h2>
-            <p className="mt-1 text-center text-sm text-slate-500">Entrez vos identifiants pour accéder au CRM.</p>
+            <p className="mt-1 text-center text-sm text-slate-500">
+              Entrez vos identifiants pour accéder au CRM.
+            </p>
 
             <form action={formAction} className="mt-5 space-y-4">
               {/* CREDENTIALS */}
               <div>
-                <label htmlFor="email" className="label">Courriel</label>
-                <input id="email" name="email" type="email" autoComplete="email" required className="input" placeholder="vous@aeria-voyages.com" />
+                <label htmlFor="email" className="label">
+                  Courriel
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="input"
+                  placeholder="vous@aeria-voyages.com"
+                />
               </div>
               <div>
-                <label htmlFor="password" className="label">Mot de passe</label>
-                <input id="password" name="password" type="password" autoComplete="current-password" required className="input" placeholder="••••••••" />
+                <label htmlFor="password" className="label">
+                  Mot de passe
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  className="input"
+                  placeholder="••••••••"
+                />
               </div>
 
               {/* FEEDBACK */}
-              {state?.error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{state.error}</p>}
+              {state?.error && (
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {state.error}
+                </p>
+              )}
 
               {/* SUBMIT */}
               <SubmitButton />
             </form>
 
             <p className="mt-4 text-center text-xs text-slate-500">
-              Route alternative: <Link href="/signin" className="font-medium text-ocean hover:underline">/signin</Link>
+              Route alternative:{" "}
+              <Link href="/signin" className="font-medium text-ocean hover:underline">
+                /signin
+              </Link>
             </p>
           </div>
         </section>

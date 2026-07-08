@@ -14,9 +14,19 @@ type Day = {
  * Les ports sont des nœuds pleins, les journées en mer des nœuds en pointillé —
  * comme un carnet de navigation.
  */
-export function RouteTimeline({ days, actions }: { days: Day[]; actions?: (day: Day) => React.ReactNode }) {
+export function RouteTimeline({
+  days,
+  actions,
+}: {
+  days: Day[];
+  actions?: (day: Day) => React.ReactNode;
+}) {
   if (days.length === 0) {
-    return <p className="text-sm text-slate-500">Aucune escale. Ajoutez le premier jour de l&apos;itinéraire.</p>;
+    return (
+      <p className="text-sm text-slate-500">
+        Aucune escale. Ajoutez le premier jour de l&apos;itinéraire.
+      </p>
+    );
   }
   return (
     <ol className="relative ml-3">
@@ -36,8 +46,12 @@ export function RouteTimeline({ days, actions }: { days: Day[]; actions?: (day: 
           />
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Jour {d.dayNumber}</p>
-              <p className={`text-sm font-medium ${d.isSeaDay ? "text-slate-500 italic" : "text-navy"}`}>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Jour {d.dayNumber}
+              </p>
+              <p
+                className={`text-sm font-medium ${d.isSeaDay ? "text-slate-500 italic" : "text-navy"}`}
+              >
                 {d.port}
                 {d.country && <span className="text-slate-400 font-normal"> · {d.country}</span>}
               </p>

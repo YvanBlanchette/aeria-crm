@@ -4,11 +4,11 @@ import { requireUser } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 export default async function ForfaitsPage() {
-	await requireUser();
+  await requireUser();
 
-	return (
-		<div className="max-w-4xl">
-			<ForfaitsCalculator />
-		</div>
-	);
+  return (
+    <div className="max-w-4xl">
+      <ForfaitsCalculator />
+    </div>
+  );
 }

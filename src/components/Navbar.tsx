@@ -19,7 +19,7 @@ const PAGE_CONFIG: Array<{
     match: (pathname) => pathname.startsWith("/clients"),
     title: "Clients",
     subtitle: "Gestion centralisée des contacts et de leurs profils voyage",
-        actionHref: "/clients/new",
+    actionHref: "/clients/new",
     actionLabel: "+ Nouveau client",
   },
   {

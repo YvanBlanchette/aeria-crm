@@ -117,7 +117,15 @@
       "abbreviation": "KY",
       "capital": "Frankfort",
       "founded": "1792-06-01",
-      "borders": ["Illinois", "Indiana", "Missouri", "Ohio", "Tennessee", "Virginia", "West Virginia"]
+      "borders": [
+        "Illinois",
+        "Indiana",
+        "Missouri",
+        "Ohio",
+        "Tennessee",
+        "Virginia",
+        "West Virginia"
+      ]
     },
     {
       "name": "Louisiana",
@@ -173,7 +181,16 @@
       "abbreviation": "MO",
       "capital": "Jefferson City",
       "founded": "1821-08-10",
-      "borders": ["Arkansas", "Illinois", "Iowa", "Kansas", "Kentucky", "Nebraska", "Oklahoma", "Tennessee"]
+      "borders": [
+        "Arkansas",
+        "Illinois",
+        "Iowa",
+        "Kansas",
+        "Kentucky",
+        "Nebraska",
+        "Oklahoma",
+        "Tennessee"
+      ]
     },
     {
       "name": "Montana",
@@ -292,7 +309,16 @@
       "abbreviation": "TN",
       "capital": "Nashville",
       "founded": "1796-06-01",
-      "borders": ["Alabama", "Arkansas", "Georgia", "Kentucky", "Mississippi", "Missouri", "North Carolina", "Virginia"]
+      "borders": [
+        "Alabama",
+        "Arkansas",
+        "Georgia",
+        "Kentucky",
+        "Mississippi",
+        "Missouri",
+        "North Carolina",
+        "Virginia"
+      ]
     },
     {
       "name": "Texas",

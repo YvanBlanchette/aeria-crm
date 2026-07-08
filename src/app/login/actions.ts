@@ -6,7 +6,9 @@ import { prisma } from "@/lib/db";
 import { createSession } from "@/lib/auth";
 
 export async function login(_prev: { error?: string } | undefined, formData: FormData) {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) return { error: "Courriel et mot de passe requis." };

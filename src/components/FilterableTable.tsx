@@ -25,7 +25,10 @@ function compareValues(a: unknown, b: unknown) {
   if (typeof a === "number" && typeof b === "number") {
     return a - b;
   }
-  return String(a ?? "").localeCompare(String(b ?? ""), "fr", { numeric: true, sensitivity: "base" });
+  return String(a ?? "").localeCompare(String(b ?? ""), "fr", {
+    numeric: true,
+    sensitivity: "base",
+  });
 }
 
 export function FilterableTable<T>({
@@ -52,7 +55,9 @@ export function FilterableTable<T>({
     const searchableColumns = columns.filter((c) => c.searchable !== false);
     const filtered = normalizedQuery
       ? rows.filter((row) =>
-          searchableColumns.some((col) => toSearchable(col.getValue(row)).includes(normalizedQuery))
+          searchableColumns.some((col) =>
+            toSearchable(col.getValue(row)).includes(normalizedQuery),
+          ),
         )
       : rows;
 
@@ -143,7 +148,10 @@ export function FilterableTable<T>({
                 displayedRows.map((row, index) => (
                   <tr key={getRowKey(row)} className="hover:bg-slate-50">
                     {columns.map((col) => (
-                      <td key={col.id} className={`table-td ${col.cellClassName ?? ""} ${index % 2 === 0 ? "bg-slate-100" : ""}`}>
+                      <td
+                        key={col.id}
+                        className={`table-td ${col.cellClassName ?? ""} ${index % 2 === 0 ? "bg-slate-100" : ""}`}
+                      >
                         {col.renderCell ? col.renderCell(row) : String(col.getValue(row) ?? "-")}
                       </td>
                     ))}

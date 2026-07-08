@@ -1,7 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const Logo = ({ className = "", href = "/dashboard", variant = "white" }: { className?: string; href?: string; variant?: "white" | "black" }) => {
+const Logo = ({
+  className = "",
+  href = "/dashboard",
+  variant = "white",
+}: {
+  className?: string;
+  href?: string;
+  variant?: "white" | "black";
+}) => {
   return (
     <Link href={href} className={`flex items-center gap-2 ${className}`}>
       <Image

@@ -1,44 +1,51 @@
 {
-	"name": "aeria-crm",
-	"version": "0.1.0",
-	"private": true,
-	"scripts": {
-		"dev": "next dev",
-		"dev:clean": "npm run clean:next && npm run dev",
-		"clean:next": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\"",
-		"build": "prisma generate && next build",
-		"build:clean": "npm run clean:next && npm run build",
-		"start": "next start -p 3000",
-		"db:migrate": "prisma migrate deploy",
-		"db:push": "prisma db push",
-		"db:seed": "tsx prisma/seed.ts",
-		"datasets:sync": "tsx scripts/sync-datasets.ts",
-		"lint": "next lint"
-	},
-	"dependencies": {
-		"@prisma/client": "5.19.1",
-		"bcryptjs": "2.4.3",
-		"csv-parse": "^7.0.1",
-		"jose": "5.9.6",
-		"lucide-react": "^1.23.0",
-		"next": "14.2.15",
-		"react": "18.3.1",
-		"react-dom": "18.3.1",
-		"react-icons": "^5.7.0"
-	},
-	"devDependencies": {
-		"@types/bcryptjs": "2.4.6",
-		"@types/node": "20.16.10",
-		"@types/react": "18.3.11",
-		"@types/react-dom": "18.3.0",
-		"autoprefixer": "10.4.20",
-		"postcss": "8.4.47",
-		"prisma": "5.19.1",
-		"tailwindcss": "3.4.13",
-		"tsx": "4.19.1",
-		"typescript": "5.6.2"
-	},
-	"prisma": {
-		"seed": "tsx prisma/seed.ts"
-	}
+  "name": "aeria-crm",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev:start": "docker start aeria-postgres; npm run dev",
+    "dev:stop": "docker stop aeria-postgres",
+    "dev": "next dev",
+    "dev:clean": "npm run clean:next && npm run dev",
+    "clean:next": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\"",
+    "build": "prisma generate && next build",
+    "build:clean": "npm run clean:next && npm run build",
+    "start": "next start -p 3000",
+    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "itineraries:import": "tsx scripts/import-itineraries.ts",
+    "itineraries:sync": "tsx scripts/sync-itineraries.ts",
+    "datasets:sync": "tsx scripts/sync-datasets.ts",
+    "lint": "next lint",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
+  },
+  "dependencies": {
+    "@prisma/client": "5.19.1",
+    "bcryptjs": "2.4.3",
+    "csv-parse": "^7.0.1",
+    "jose": "5.9.6",
+    "lucide-react": "^1.23.0",
+    "next": "14.2.15",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-icons": "^5.7.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "2.4.6",
+    "@types/node": "20.16.10",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.0",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.4.47",
+    "prettier": "^3.9.4",
+    "prisma": "5.19.1",
+    "tailwindcss": "3.4.13",
+    "tsx": "4.19.1",
+    "typescript": "5.6.2"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
 }

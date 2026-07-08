@@ -10,15 +10,24 @@ import { RouteTimeline } from "@/components/RouteTimeline";
 export const dynamic = "force-dynamic";
 
 export default async function BookingDetail({
-  params, searchParams,
-}: { params: { id: string }; searchParams: { edit?: string } }) {
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { edit?: string };
+}) {
   await requireUser();
   const booking = await prisma.booking.findUnique({
     where: { id: params.id },
     include: {
       client: true,
       agent: { select: { name: true } },
-      itinerary: { include: { ship: { include: { cruiseLine: true } }, days: { orderBy: { dayNumber: "asc" } } } },
+      itinerary: {
+        include: {
+          ship: { include: { cruiseLine: true } },
+          days: { orderBy: { dayNumber: "asc" } },
+        },
+      },
       payments: { orderBy: { createdAt: "asc" } },
       paymentSchedules: { orderBy: { dueDate: "asc" } },
       segments: {
@@ -60,10 +69,14 @@ export default async function BookingDetail({
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <Link href="/bookings" className="text-sm text-slate-500 hover:text-ocean">← Réservations</Link>
+          <Link href="/bookings" className="text-sm text-slate-500 hover:text-ocean">
+            ← Réservations
+          </Link>
           <h1 className="text-2xl font-bold text-navy mt-1">
             {booking.reference}
-            <span className="badge bg-ocean-100 text-ocean-600 ml-3 align-middle">{BOOKING_STATUS_LABELS[booking.status]}</span>
+            <span className="badge bg-ocean-100 text-ocean-600 ml-3 align-middle">
+              {BOOKING_STATUS_LABELS[booking.status]}
+            </span>
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             <Link href={`/clients/${booking.client.id}`} className="text-ocean hover:underline">
@@ -73,8 +86,14 @@ export default async function BookingDetail({
           </p>
         </div>
         <div className="flex gap-2">
-          {!editing && <Link href={`/bookings/${booking.id}?edit=1`} className="btn-secondary">Modifier</Link>}
-          <form action={deleteAction}><button className="btn-danger">Supprimer</button></form>
+          {!editing && (
+            <Link href={`/bookings/${booking.id}?edit=1`} className="btn-secondary">
+              Modifier
+            </Link>
+          )}
+          <form action={deleteAction}>
+            <button className="btn-danger">Supprimer</button>
+          </form>
         </div>
       </div>
 
@@ -93,23 +112,60 @@ export default async function BookingDetail({
             <section className="card p-5 space-y-3">
               <h2 className="font-semibold text-navy">Voyage</h2>
               <dl className="text-sm space-y-2">
-                <div><dt className="label">Départ</dt><dd>{fmtDate(booking.sailingDate)}</dd></div>
-                <div><dt className="label">Retour</dt><dd>{fmtDate(booking.returnDate)}</dd></div>
-                <div><dt className="label">Cabine</dt><dd>{CABIN_LABELS[booking.cabinType]}{booking.cabinNumber ? ` — ${booking.cabinNumber}` : ""}</dd></div>
-                <div><dt className="label">Passagers</dt><dd>{booking.passengers}</dd></div>
+                <div>
+                  <dt className="label">Départ</dt>
+                  <dd>{fmtDate(booking.sailingDate)}</dd>
+                </div>
+                <div>
+                  <dt className="label">Retour</dt>
+                  <dd>{fmtDate(booking.returnDate)}</dd>
+                </div>
+                <div>
+                  <dt className="label">Cabine</dt>
+                  <dd>
+                    {CABIN_LABELS[booking.cabinType]}
+                    {booking.cabinNumber ? ` — ${booking.cabinNumber}` : ""}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="label">Passagers</dt>
+                  <dd>{booking.passengers}</dd>
+                </div>
                 {booking.itinerary?.ship && (
-                  <div><dt className="label">Navire</dt><dd>{booking.itinerary.ship.cruiseLine.name} · {booking.itinerary.ship.name}</dd></div>
+                  <div>
+                    <dt className="label">Navire</dt>
+                    <dd>
+                      {booking.itinerary.ship.cruiseLine.name} · {booking.itinerary.ship.name}
+                    </dd>
+                  </div>
                 )}
               </dl>
             </section>
             <section className="card p-5 space-y-3">
               <h2 className="font-semibold text-navy">Finances</h2>
               <dl className="text-sm space-y-2">
-                <div><dt className="label">Prix total</dt><dd className="text-lg font-bold text-navy">{fmtMoney(booking.totalPrice)}</dd></div>
-                <div><dt className="label">Dépôt reçu</dt><dd>{fmtMoney(booking.deposit)}</dd></div>
-                <div><dt className="label">Solde restant</dt><dd className={balance > 0 ? "font-medium text-amber-700" : "text-emerald-700"}>{fmtMoney(balance)}</dd></div>
-                <div><dt className="label">Solde dû le</dt><dd>{fmtDate(booking.balanceDueDate)}</dd></div>
-                <div><dt className="label">Commission</dt><dd>{fmtMoney(booking.commission)}</dd></div>
+                <div>
+                  <dt className="label">Prix total</dt>
+                  <dd className="text-lg font-bold text-navy">{fmtMoney(booking.totalPrice)}</dd>
+                </div>
+                <div>
+                  <dt className="label">Dépôt reçu</dt>
+                  <dd>{fmtMoney(booking.deposit)}</dd>
+                </div>
+                <div>
+                  <dt className="label">Solde restant</dt>
+                  <dd className={balance > 0 ? "font-medium text-amber-700" : "text-emerald-700"}>
+                    {fmtMoney(balance)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="label">Solde dû le</dt>
+                  <dd>{fmtDate(booking.balanceDueDate)}</dd>
+                </div>
+                <div>
+                  <dt className="label">Commission</dt>
+                  <dd>{fmtMoney(booking.commission)}</dd>
+                </div>
               </dl>
             </section>
             {booking.notes && (
@@ -127,14 +183,18 @@ export default async function BookingDetail({
                 <ul className="space-y-3">
                   {booking.segments.map((s, idx) => (
                     <li key={s.id} className="rounded-lg border border-slate-200 p-3 text-sm">
-                      <p className="font-medium text-navy">{idx + 1}. {s.title || s.type}</p>
+                      <p className="font-medium text-navy">
+                        {idx + 1}. {s.title || s.type}
+                      </p>
                       <p className="text-slate-600">
                         {s.supplierName || "Fournisseur à préciser"}
                         {s.startAt ? ` · ${fmtDate(s.startAt)}` : ""}
                         {s.endAt ? ` → ${fmtDate(s.endAt)}` : ""}
                       </p>
                       {(s.totalAmount || s.baseAmount) && (
-                        <p className="text-slate-700 mt-1">Montant: {fmtMoney(s.totalAmount ?? s.baseAmount)}</p>
+                        <p className="text-slate-700 mt-1">
+                          Montant: {fmtMoney(s.totalAmount ?? s.baseAmount)}
+                        </p>
                       )}
                     </li>
                   ))}
@@ -150,8 +210,12 @@ export default async function BookingDetail({
                 <ul className="space-y-2">
                   {booking.payments.map((p) => (
                     <li key={p.id} className="text-sm rounded-lg border border-slate-200 p-3">
-                      <p className="font-medium text-navy">{fmtMoney(p.amount)} · {p.type}</p>
-                      <p className="text-slate-600">{p.paidAt ? fmtDate(p.paidAt) : "Date à confirmer"} · {p.status}</p>
+                      <p className="font-medium text-navy">
+                        {fmtMoney(p.amount)} · {p.type}
+                      </p>
+                      <p className="text-slate-600">
+                        {p.paidAt ? fmtDate(p.paidAt) : "Date à confirmer"} · {p.status}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -166,8 +230,12 @@ export default async function BookingDetail({
                 <ul className="space-y-2">
                   {booking.paymentSchedules.map((s) => (
                     <li key={s.id} className="text-sm rounded-lg border border-slate-200 p-3">
-                      <p className="font-medium text-navy">{s.label || "Échéance"} · {fmtMoney(s.amount)}</p>
-                      <p className="text-slate-600">{fmtDate(s.dueDate)} · {s.status}</p>
+                      <p className="font-medium text-navy">
+                        {s.label || "Échéance"} · {fmtMoney(s.amount)}
+                      </p>
+                      <p className="text-slate-600">
+                        {fmtDate(s.dueDate)} · {s.status}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -180,14 +248,21 @@ export default async function BookingDetail({
             {booking.itinerary ? (
               <>
                 <p className="text-sm text-slate-500 mb-5">
-                  <Link href={`/itineraries/${booking.itinerary.id}`} className="text-ocean hover:underline">{booking.itinerary.name}</Link>
-                  {" · "}{booking.itinerary.nights} nuits au départ de {booking.itinerary.departurePort}
+                  <Link
+                    href={`/itineraries/${booking.itinerary.id}`}
+                    className="text-ocean hover:underline"
+                  >
+                    {booking.itinerary.name}
+                  </Link>
+                  {" · "}
+                  {booking.itinerary.nights} nuits au départ de {booking.itinerary.departurePort}
                 </p>
                 <RouteTimeline days={booking.itinerary.days} />
               </>
             ) : (
               <p className="text-sm text-slate-500">
-                Aucun itinéraire lié. Modifiez la réservation pour en associer un, ou créez-le dans l&apos;onglet Itinéraires.
+                Aucun itinéraire lié. Modifiez la réservation pour en associer un, ou créez-le dans
+                l&apos;onglet Itinéraires.
               </p>
             )}
           </section>

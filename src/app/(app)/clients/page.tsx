@@ -28,13 +28,19 @@ export default async function ClientsPage({
     settings?.defaultClientView === "archived" || settings?.defaultClientView === "all"
       ? settings.defaultClientView
       : "active";
-  const view = searchParams.view === "archived" || searchParams.view === "all" ? searchParams.view : defaultView;
+  const view =
+    searchParams.view === "archived" || searchParams.view === "all"
+      ? searchParams.view
+      : defaultView;
   const passportAlertDays = settings?.passportAlertDays ?? 180;
   const imported = Number(searchParams.imported ?? 0);
   const updated = Number(searchParams.updated ?? 0);
   const skipped = Number(searchParams.skipped ?? 0);
   const isPreview = searchParams.preview === "1";
-  const hasImportResult = searchParams.imported !== undefined || searchParams.updated !== undefined || searchParams.skipped !== undefined;
+  const hasImportResult =
+    searchParams.imported !== undefined ||
+    searchParams.updated !== undefined ||
+    searchParams.skipped !== undefined;
 
   const where =
     view === "archived"

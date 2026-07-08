@@ -8,7 +8,9 @@ export default async function NewClientPage() {
   return (
     <div className="space-y-5">
       <div>
-        <Link href="/clients" className="text-sm text-slate-500 hover:text-ocean">← Clients</Link>
+        <Link href="/clients" className="text-sm text-slate-500 hover:text-ocean">
+          ← Clients
+        </Link>
         <h1 className="text-2xl font-bold text-navy mt-1">Nouveau client</h1>
       </div>
       <ClientForm action={createClient} submitLabel="Créer le client" />

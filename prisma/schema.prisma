@@ -166,10 +166,18 @@ model Client {
   emergencyContactRelation String?
   emergencyContactPhone String?
   emergencyContactEmail String?
-  address        String?
+  street         String?
+  city           String?
+  province       String?
+  country        String?
+  zipCode        String?
   billingCompany String?
   billingTaxNumber String?
-  billingAddress String?
+  billingStreet  String?
+  billingCity    String?
+  billingProvince String?
+  billingCountry String?
+  billingZipCode String?
   // Préférences croisière : cabine favorite, compagnies préférées, régimes, mobilité...
   preferences    String?
   roomPreferences String?
@@ -249,6 +257,8 @@ model Itinerary {
   days          ItineraryDay[]
   bookings      Booking[]
   createdAt     DateTime        @default(now())
+
+  @@unique([providerName, externalId])
 }
 
 model ItineraryDay {
@@ -408,8 +418,11 @@ model HotelSegment {
   segment        BookingSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
   segmentId      String         @id
   hotelName      String?
-  address        String?
+  street         String?
   city           String?
+  province       String?
+  country        String?
+  zipCode        String?
   checkInDate    DateTime?
   checkOutDate   DateTime?
   roomType       String?
@@ -580,7 +593,11 @@ model AgencySettings {
   contactEmail         String?
   contactPhone         String?
   website              String?
-  address              String?
+  street               String?
+  city                 String?
+  province             String?
+  country              String?
+  zipCode              String?
   timezone             String   @default("America/Toronto")
   defaultCurrency      String   @default("CAD")
   defaultLanguage      String   @default("fr")

@@ -1,13 +1,21 @@
 export function fmtDate(d: Date | string | null | undefined) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("fr-CA", { year: "numeric", month: "short", day: "numeric" });
+  return new Date(d).toLocaleDateString("fr-CA", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 export function fmtMoney(v: unknown) {
   if (v === null || v === undefined) return "—";
   const n = Number(v);
   if (Number.isNaN(n)) return "—";
-  return n.toLocaleString("fr-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 });
+  return n.toLocaleString("fr-CA", {
+    style: "currency",
+    currency: "CAD",
+    maximumFractionDigits: 0,
+  });
 }
 
 export const LEAD_STATUS_LABELS: Record<string, string> = {

@@ -13,7 +13,11 @@ const STATUS_COLORS: Record<string, string> = {
   COMPLETED: "bg-slate-100 text-slate-600",
 };
 
-export default async function BookingsPage({ searchParams }: { searchParams: { status?: string } }) {
+export default async function BookingsPage({
+  searchParams,
+}: {
+  searchParams: { status?: string };
+}) {
   await requireUser();
   const status = searchParams.status;
   const bookings = await prisma.booking.findMany({
@@ -26,10 +30,18 @@ export default async function BookingsPage({ searchParams }: { searchParams: { s
   return (
     <div className="space-y-5">
       <div className="flex gap-2 flex-wrap">
-        <Link href="/bookings" className={`badge ${!status ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>Toutes</Link>
+        <Link
+          href="/bookings"
+          className={`badge ${!status ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}
+        >
+          Toutes
+        </Link>
         {Object.entries(BOOKING_STATUS_LABELS).map(([v, l]) => (
-          <Link key={v} href={`/bookings?status=${v}`}
-            className={`badge ${status === v ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}>
+          <Link
+            key={v}
+            href={`/bookings?status=${v}`}
+            className={`badge ${status === v ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}
+          >
             {l}
           </Link>
         ))}
@@ -55,21 +67,41 @@ export default async function BookingsPage({ searchParams }: { searchParams: { s
               {bookings.map((b) => (
                 <tr key={b.id} className="hover:bg-slate-50">
                   <td className="table-td">
-                    <Link href={`/bookings/${b.id}`} className="font-medium text-ocean hover:underline">{b.reference}</Link>
+                    <Link
+                      href={`/bookings/${b.id}`}
+                      className="font-medium text-ocean hover:underline"
+                    >
+                      {b.reference}
+                    </Link>
                   </td>
-                  <td className="table-td">{b.client.firstName} {b.client.lastName}</td>
+                  <td className="table-td">
+                    {b.client.firstName} {b.client.lastName}
+                  </td>
                   <td className="table-td text-slate-600">
                     {b.itinerary ? (
                       <>
                         {b.itinerary.name}
-                        {b.itinerary.ship && <span className="block text-xs text-slate-400">{b.itinerary.ship.cruiseLine.name} · {b.itinerary.ship.name}</span>}
+                        {b.itinerary.ship && (
+                          <span className="block text-xs text-slate-400">
+                            {b.itinerary.ship.cruiseLine.name} · {b.itinerary.ship.name}
+                          </span>
+                        )}
                       </>
-                    ) : "—"}
+                    ) : (
+                      "—"
+                    )}
                   </td>
-                  <td className="table-td">{CABIN_LABELS[b.cabinType]}{b.cabinNumber ? ` ${b.cabinNumber}` : ""}</td>
+                  <td className="table-td">
+                    {CABIN_LABELS[b.cabinType]}
+                    {b.cabinNumber ? ` ${b.cabinNumber}` : ""}
+                  </td>
                   <td className="table-td">{fmtDate(b.sailingDate)}</td>
                   <td className="table-td font-medium">{fmtMoney(b.totalPrice)}</td>
-                  <td className="table-td"><span className={`badge ${STATUS_COLORS[b.status]}`}>{BOOKING_STATUS_LABELS[b.status]}</span></td>
+                  <td className="table-td">
+                    <span className={`badge ${STATUS_COLORS[b.status]}`}>
+                      {BOOKING_STATUS_LABELS[b.status]}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>

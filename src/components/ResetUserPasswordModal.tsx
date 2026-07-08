@@ -42,12 +42,30 @@ export function ResetUserPasswordModal({
 
             <form ref={formRef} action={action} className="mt-4 space-y-3">
               <div>
-                <label className="label" htmlFor="reset-newPassword">Nouveau mot de passe</label>
-                <input id="reset-newPassword" name="newPassword" type="password" minLength={8} required className="input" />
+                <label className="label" htmlFor="reset-newPassword">
+                  Nouveau mot de passe
+                </label>
+                <input
+                  id="reset-newPassword"
+                  name="newPassword"
+                  type="password"
+                  minLength={8}
+                  required
+                  className="input"
+                />
               </div>
               <div>
-                <label className="label" htmlFor="reset-confirmPassword">Confirmer le mot de passe</label>
-                <input id="reset-confirmPassword" name="confirmPassword" type="password" minLength={8} required className="input" />
+                <label className="label" htmlFor="reset-confirmPassword">
+                  Confirmer le mot de passe
+                </label>
+                <input
+                  id="reset-confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  minLength={8}
+                  required
+                  className="input"
+                />
               </div>
 
               <div className="mt-4 flex items-center justify-end gap-2">

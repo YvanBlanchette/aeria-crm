@@ -58,37 +58,25 @@
                                               et « 4000 » (fichier .sqlite)
 ═══════════════════════════════════════════════════════════════════════════ -->
 <html lang="fr">
-	<head>
-		<meta charset="UTF-8" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0"
-		/>
-		<title>Calculateur de forfaits croisière</title>
-		<!-- Dépendances LOCALES (dossier lib/) — l'outil fonctionne 100 % hors ligne. -->
-		<link
-			rel="stylesheet"
-			href="lib/fonts/fonts.css"
-		/>
-		<!-- polices hors ligne -->
-		<link
-			rel="stylesheet"
-			href="lib/tailwind-utilities.min.css"
-		/>
-		<!-- toutes les classes Tailwind v2 -->
-		<script src="lib/xlsx.full.min.js"></script>
-		<!-- SheetJS : Excel -->
-		<script src="lib/jspdf.umd.min.js"></script>
-		<!-- jsPDF : PDF client -->
-		<script src="lib/sql-wasm.js"></script>
-		<!-- sql.js : base SQLite -->
-		<link
-			rel="stylesheet"
-			href="app/main.css"
-		/>
-	</head>
-	<body class="bg-ecume min-h-screen">
-		<!-- =====================================================================
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculateur de forfaits croisière</title>
+    <!-- Dépendances LOCALES (dossier lib/) — l'outil fonctionne 100 % hors ligne. -->
+    <link rel="stylesheet" href="lib/fonts/fonts.css" />
+    <!-- polices hors ligne -->
+    <link rel="stylesheet" href="lib/tailwind-utilities.min.css" />
+    <!-- toutes les classes Tailwind v2 -->
+    <script src="lib/xlsx.full.min.js"></script>
+    <!-- SheetJS : Excel -->
+    <script src="lib/jspdf.umd.min.js"></script>
+    <!-- jsPDF : PDF client -->
+    <script src="lib/sql-wasm.js"></script>
+    <!-- sql.js : base SQLite -->
+    <link rel="stylesheet" href="app/main.css" />
+  </head>
+  <body class="bg-ecume min-h-screen">
+    <!-- =====================================================================
 LAYOUT ASSEMBLÉ DYNAMIQUEMENT
 - app/fragments/accueil.fragment.js : écran d'accueil
 - app/fragments/header.fragment.js  : en-tête + onglets
@@ -98,13 +86,13 @@ LAYOUT ASSEMBLÉ DYNAMIQUEMENT
 IMPORTANT : app/main.js doit rester APRÈS render-layout.js pour que tous
 les éléments (ids, boutons, sections) existent avant le binding JS.
 ===================================================================== -->
-		<div id="app-shell"></div>
+    <div id="app-shell"></div>
 
-		<script src="app/fragments/accueil.fragment.js"></script>
-		<script src="app/fragments/header.fragment.js"></script>
-		<script src="app/fragments/pages.fragment.js"></script>
-		<script src="app/fragments/render-layout.js"></script>
-		<script src="app/aeria-logo-data.js"></script>
-		<script src="app/main.js"></script>
-	</body>
+    <script src="app/fragments/accueil.fragment.js"></script>
+    <script src="app/fragments/header.fragment.js"></script>
+    <script src="app/fragments/pages.fragment.js"></script>
+    <script src="app/fragments/render-layout.js"></script>
+    <script src="app/aeria-logo-data.js"></script>
+    <script src="app/main.js"></script>
+  </body>
 </html>

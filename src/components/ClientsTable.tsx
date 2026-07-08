@@ -86,7 +86,9 @@ export function ClientsTable({
             }}
             title="Cliquer pour copier"
           >
-            <span>{row.firstName} {row.lastName}</span>
+            <span>
+              {row.firstName} {row.lastName}
+            </span>
             {row.isArchived && <span className="badge bg-slate-200 text-slate-700">Archive</span>}
           </button>
         ),
@@ -197,17 +199,26 @@ export function ClientsTable({
         cellClassName: "whitespace-nowrap",
         renderCell: (row) => (
           <div className="flex items-center justify-end gap-2">
-            <Link href={`/clients/${row.id}`} className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs text-slate-600 hover:text-ocean hover:border-ocean/40">
+            <Link
+              href={`/clients/${row.id}`}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs text-slate-600 hover:text-ocean hover:border-ocean/40"
+            >
               <Eye className="h-3.5 w-3.5" />
               Voir
             </Link>
-            <Link href={`/clients/${row.id}?edit=1`} className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs text-slate-600 hover:text-ocean hover:border-ocean/40">
+            <Link
+              href={`/clients/${row.id}?edit=1`}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs text-slate-600 hover:text-ocean hover:border-ocean/40"
+            >
               <Pencil className="h-3.5 w-3.5" />
               Modifier
             </Link>
             {row.isArchived ? (
               <form action={restoreAction.bind(null, row.id)}>
-                <button type="submit" className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs text-slate-600 hover:text-emerald-700 hover:border-emerald-300">
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs text-slate-600 hover:text-emerald-700 hover:border-emerald-300"
+                >
                   <RotateCcw className="h-3.5 w-3.5" />
                   Réactiver
                 </button>
