@@ -9,12 +9,15 @@ export const dynamic = "force-dynamic";
 export default async function NewBookingPage({
   searchParams,
 }: {
-  searchParams: { clientId?: string };
+  searchParams: { clientId?: string; itineraryId?: string };
 }) {
   await requireUser();
   const [clients, itineraries] = await Promise.all([
     prisma.client.findMany({ orderBy: { lastName: "asc" }, take: 500 }),
-    prisma.itinerary.findMany({ orderBy: { name: "asc" }, include: { ship: true } }),
+    prisma.itinerary.findMany({
+      orderBy: { name: "asc" },
+      include: { ship: { include: { cruiseLine: true } } },
+    }),
   ]);
 
   return (
@@ -29,10 +32,16 @@ export default async function NewBookingPage({
         action={createBooking}
         submitLabel="Créer la réservation"
         defaultClientId={searchParams.clientId}
+        defaultItineraryId={searchParams.itineraryId}
         clients={clients.map((c) => ({ id: c.id, label: `${c.lastName}, ${c.firstName}` }))}
         itineraries={itineraries.map((i) => ({
           id: i.id,
           label: `${i.name}${i.ship ? ` — ${i.ship.name}` : ""} (${i.nights} nuits)`,
+          nights: i.nights,
+          departurePort: i.departurePort,
+          arrivalPort: i.arrivalPort,
+          shipName: i.ship?.name,
+          cruiseLineName: i.ship?.cruiseLine.name,
         }))}
       />
     </>

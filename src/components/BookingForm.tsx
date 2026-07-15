@@ -1,12 +1,28 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BOOKING_STATUS_LABELS } from "@/lib/format";
 
 type Option = { id: string; label: string };
+type ItineraryOption = {
+  id: string;
+  label: string;
+  nights: number;
+  departurePort: string;
+  arrivalPort?: string | null;
+  shipName?: string | null;
+  cruiseLineName?: string | null;
+};
 
 type SegmentType =
-  "CRUISE" | "FLIGHT" | "HOTEL" | "TRANSFER" | "ACTIVITY" | "INSURANCE" | "FEE" | "OTHER";
+  | "CRUISE"
+  | "FLIGHT"
+  | "HOTEL"
+  | "TRANSFER"
+  | "ACTIVITY"
+  | "INSURANCE"
+  | "FEE"
+  | "OTHER";
 
 type SegmentDraft = {
   type: SegmentType;
@@ -52,6 +68,7 @@ type PaymentScheduleDraft = {
 
 type BookingLike = {
   clientId?: string;
+  itineraryId?: string | null;
   status?: string;
   reference?: string;
   packageType?: string | null;
@@ -310,18 +327,21 @@ const SEGMENT_LABELS: Record<SegmentType, string> = {
 
 export function BookingForm({
   clients,
+  itineraries,
   booking,
   action,
   submitLabel,
   defaultClientId,
+  defaultItineraryId,
   lockClient,
 }: {
   clients: Option[];
-  itineraries?: Option[];
+  itineraries?: ItineraryOption[];
   booking?: BookingLike;
   action: (fd: FormData) => void;
   submitLabel: string;
   defaultClientId?: string;
+  defaultItineraryId?: string;
   lockClient?: boolean;
 }) {
   const initialCurrency = booking?.currency ?? "CAD";
@@ -335,6 +355,23 @@ export function BookingForm({
 
   const [segments, setSegments] = useState<SegmentDraft[]>(initialSegments);
   const [currency, setCurrency] = useState(initialCurrency);
+  const [selectedItineraryId, setSelectedItineraryId] = useState(
+    booking?.itineraryId ?? defaultItineraryId ?? "",
+  );
+  const [packageType, setPackageType] = useState(booking?.packageType ?? "");
+  const [destinationMain, setDestinationMain] = useState(booking?.destinationMain ?? "");
+  const [supplierMain, setSupplierMain] = useState(booking?.supplierMain ?? "");
+  const [globalDepartureDate, setGlobalDepartureDate] = useState(
+    d(booking?.globalDepartureDate ?? booking?.sailingDate),
+  );
+  const [globalReturnDate, setGlobalReturnDate] = useState(
+    d(booking?.globalReturnDate ?? booking?.returnDate),
+  );
+
+  const selectedItinerary = useMemo(
+    () => itineraries?.find((item) => item.id === selectedItineraryId),
+    [itineraries, selectedItineraryId],
+  );
 
   const initialPayments = useMemo(
     () =>
@@ -354,6 +391,62 @@ export function BookingForm({
 
   const [payments, setPayments] = useState<PaymentDraft[]>(initialPayments);
   const [schedules, setSchedules] = useState<PaymentScheduleDraft[]>(initialSchedules);
+
+  useEffect(() => {
+    if (!selectedItinerary || !globalDepartureDate || globalReturnDate) return;
+    const departure = new Date(`${globalDepartureDate}T00:00:00`);
+    departure.setDate(departure.getDate() + selectedItinerary.nights);
+    setGlobalReturnDate(departure.toISOString().slice(0, 10));
+  }, [selectedItinerary, globalDepartureDate, globalReturnDate]);
+
+  useEffect(() => {
+    if (!selectedItinerary) return;
+
+    const suggestedDestination =
+      selectedItinerary.arrivalPort &&
+      selectedItinerary.arrivalPort !== selectedItinerary.departurePort
+        ? selectedItinerary.arrivalPort
+        : selectedItinerary.departurePort;
+
+    setPackageType((prev) => prev || "Croisière");
+    setDestinationMain((prev) => prev || suggestedDestination);
+    setSupplierMain(
+      (prev) => prev || selectedItinerary.cruiseLineName || selectedItinerary.shipName || "",
+    );
+
+    setSegments((prev) => {
+      const cruiseIndex = prev.findIndex((segment) => segment.type === "CRUISE");
+      if (cruiseIndex < 0) return prev;
+
+      const cruise = prev[cruiseIndex];
+      const hasData = Boolean(
+        cruise.title ||
+        cruise.supplierName ||
+        cruise.startAt ||
+        cruise.endAt ||
+        cruise.details.cruiseLine ||
+        cruise.details.shipName ||
+        cruise.details.cabinCategory ||
+        cruise.details.cruiseBookingNumber,
+      );
+      if (hasData) return prev;
+
+      const next = [...prev];
+      next[cruiseIndex] = {
+        ...cruise,
+        title: selectedItinerary.label,
+        supplierName: selectedItinerary.cruiseLineName ?? cruise.supplierName,
+        startAt: globalDepartureDate || cruise.startAt,
+        endAt: globalReturnDate || cruise.endAt,
+        details: {
+          ...cruise.details,
+          cruiseLine: selectedItinerary.cruiseLineName ?? "",
+          shipName: selectedItinerary.shipName ?? "",
+        },
+      };
+      return next;
+    });
+  }, [selectedItinerary, globalDepartureDate, globalReturnDate]);
 
   const segmentsJson = useMemo(() => JSON.stringify(segments), [segments]);
   const paymentsJson = useMemo(() => JSON.stringify(payments), [payments]);
@@ -455,7 +548,8 @@ export function BookingForm({
             <input
               id="packageType"
               name="packageType"
-              defaultValue={booking?.packageType ?? ""}
+              value={packageType}
+              onChange={(e) => setPackageType(e.target.value)}
               className="input"
               placeholder="Croisière + Vol + Hôtel"
             />
@@ -479,7 +573,8 @@ export function BookingForm({
             <input
               id="destinationMain"
               name="destinationMain"
-              defaultValue={booking?.destinationMain ?? ""}
+              value={destinationMain}
+              onChange={(e) => setDestinationMain(e.target.value)}
               className="input"
             />
           </div>
@@ -490,7 +585,8 @@ export function BookingForm({
             <input
               id="supplierMain"
               name="supplierMain"
-              defaultValue={booking?.supplierMain ?? ""}
+              value={supplierMain}
+              onChange={(e) => setSupplierMain(e.target.value)}
               className="input"
             />
           </div>
@@ -514,7 +610,8 @@ export function BookingForm({
               name="globalDepartureDate"
               type="date"
               required
-              defaultValue={d(booking?.globalDepartureDate ?? booking?.sailingDate)}
+              value={globalDepartureDate}
+              onChange={(e) => setGlobalDepartureDate(e.target.value)}
               className="input"
             />
           </div>
@@ -526,7 +623,8 @@ export function BookingForm({
               id="globalReturnDate"
               name="globalReturnDate"
               type="date"
-              defaultValue={d(booking?.globalReturnDate ?? booking?.returnDate)}
+              value={globalReturnDate}
+              onChange={(e) => setGlobalReturnDate(e.target.value)}
               className="input"
             />
           </div>
@@ -543,6 +641,40 @@ export function BookingForm({
             />
           </div>
         </div>
+
+        {itineraries && itineraries.length > 0 && (
+          <div className="space-y-2">
+            <label className="label" htmlFor="itineraryId">
+              Itinéraire de croisière lié
+            </label>
+            <select
+              id="itineraryId"
+              name="itineraryId"
+              className="input"
+              value={selectedItineraryId}
+              onChange={(e) => setSelectedItineraryId(e.target.value)}
+            >
+              <option value="">— Aucun itinéraire lié —</option>
+              {itineraries.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+            {selectedItinerary && (
+              <p className="text-xs text-slate-500">
+                {selectedItinerary.nights} nuits · {selectedItinerary.departurePort}
+                {selectedItinerary.arrivalPort &&
+                selectedItinerary.arrivalPort !== selectedItinerary.departurePort
+                  ? ` → ${selectedItinerary.arrivalPort}`
+                  : " (boucle)"}
+                {selectedItinerary.shipName
+                  ? ` · ${selectedItinerary.cruiseLineName ? `${selectedItinerary.cruiseLineName}, ` : ""}${selectedItinerary.shipName}`
+                  : ""}
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       {/* FINANCE */}

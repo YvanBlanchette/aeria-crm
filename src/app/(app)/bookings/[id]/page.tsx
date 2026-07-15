@@ -49,16 +49,32 @@ export default async function BookingDetail({
   const balance = Number(booking.totalPrice) - Number(booking.deposit ?? 0);
 
   let clientOptions: { id: string; label: string }[] = [];
-  let itineraryOptions: { id: string; label: string }[] = [];
+  let itineraryOptions: {
+    id: string;
+    label: string;
+    nights: number;
+    departurePort: string;
+    arrivalPort?: string | null;
+    shipName?: string | null;
+    cruiseLineName?: string | null;
+  }[] = [];
   if (editing) {
     const [clients, itineraries] = await Promise.all([
       prisma.client.findMany({ orderBy: { lastName: "asc" }, take: 500 }),
-      prisma.itinerary.findMany({ orderBy: { name: "asc" }, include: { ship: true } }),
+      prisma.itinerary.findMany({
+        orderBy: { name: "asc" },
+        include: { ship: { include: { cruiseLine: true } } },
+      }),
     ]);
     clientOptions = clients.map((c) => ({ id: c.id, label: `${c.lastName}, ${c.firstName}` }));
     itineraryOptions = itineraries.map((i) => ({
       id: i.id,
       label: `${i.name}${i.ship ? ` — ${i.ship.name}` : ""} (${i.nights} nuits)`,
+      nights: i.nights,
+      departurePort: i.departurePort,
+      arrivalPort: i.arrivalPort,
+      shipName: i.ship?.name,
+      cruiseLineName: i.ship?.cruiseLine.name,
     }));
   }
 

@@ -121,6 +121,54 @@ function toAmount(value?: string) {
   return Number.isFinite(n) ? n : null;
 }
 
+function toIsoDate(value: Date | null | undefined) {
+  if (!value) return undefined;
+  return value.toISOString().slice(0, 10);
+}
+
+function buildReturnDateFromNights(departure: Date | null, nights: number) {
+  if (!departure || !Number.isFinite(nights) || nights <= 0) return null;
+  const date = new Date(departure);
+  date.setDate(date.getDate() + nights);
+  return date;
+}
+
+async function withAutoCruiseSegment(
+  tx: any,
+  segments: SegmentInput[],
+  itineraryId: string | null,
+  globalDepartureDate: Date | null,
+  globalReturnDate: Date | null,
+): Promise<SegmentInput[]> {
+  if (segments.length > 0 || !itineraryId) return segments;
+
+  const itinerary = await tx.itinerary.findUnique({
+    where: { id: itineraryId },
+    include: { ship: { include: { cruiseLine: true } } },
+  });
+  if (!itinerary) return segments;
+
+  const inferredReturnDate =
+    globalReturnDate ?? buildReturnDateFromNights(globalDepartureDate, itinerary.nights);
+
+  return [
+    {
+      type: "CRUISE",
+      title: itinerary.name,
+      supplierName: itinerary.ship?.cruiseLine.name || null || undefined,
+      startAt: toIsoDate(globalDepartureDate),
+      endAt: toIsoDate(inferredReturnDate),
+      includedInPackage: true,
+      optionalForClient: false,
+      clientVisible: true,
+      details: {
+        cruiseLine: itinerary.ship?.cruiseLine.name || "",
+        shipName: itinerary.ship?.name || "",
+      },
+    },
+  ];
+}
+
 async function createSegments(
   tx: any,
   bookingId: string,
@@ -360,7 +408,14 @@ export async function createBooking(formData: FormData) {
     },
   });
 
-  await createSegments(prisma, booking.id, segments, defaultCurrency);
+  const resolvedSegments = await withAutoCruiseSegment(
+    prisma,
+    segments,
+    itineraryId,
+    globalDepartureDate,
+    globalReturnDate,
+  );
+  await createSegments(prisma, booking.id, resolvedSegments, defaultCurrency);
   await createPaymentsAndSchedules(prisma, booking.id, payments, paymentSchedules, defaultCurrency);
   revalidatePath("/bookings");
   redirect(`/bookings/${booking.id}`);
@@ -374,6 +429,7 @@ export async function updateBooking(id: string, formData: FormData) {
   const globalDepartureDate = date(formData, "globalDepartureDate");
   const globalReturnDate = date(formData, "globalReturnDate");
   const defaultCurrency = str(formData, "currency") ?? "CAD";
+  const itineraryId = str(formData, "itineraryId");
 
   await prisma.$transaction(async (tx) => {
     await tx.booking.update({
@@ -399,7 +455,7 @@ export async function updateBooking(id: string, formData: FormData) {
         commission: num(formData, "commission"),
         balanceDueDate: date(formData, "balanceDueDate"),
         notes: str(formData, "internalNotes"),
-        itineraryId: str(formData, "itineraryId"),
+        itineraryId,
         cabinType: (str(formData, "cabinType") ?? "INTERIOR") as CabinType,
         cabinNumber: str(formData, "cabinNumber"),
         passengers: num(formData, "passengers") ?? 2,
@@ -409,7 +465,14 @@ export async function updateBooking(id: string, formData: FormData) {
     await tx.bookingSegment.deleteMany({ where: { bookingId: id } });
     await tx.bookingPaymentSchedule.deleteMany({ where: { bookingId: id } });
     await tx.bookingPayment.deleteMany({ where: { bookingId: id } });
-    await createSegments(tx, id, segments, defaultCurrency);
+    const resolvedSegments = await withAutoCruiseSegment(
+      tx,
+      segments,
+      itineraryId,
+      globalDepartureDate,
+      globalReturnDate,
+    );
+    await createSegments(tx, id, resolvedSegments, defaultCurrency);
     await createPaymentsAndSchedules(tx, id, payments, paymentSchedules, defaultCurrency);
   });
   revalidatePath("/bookings");

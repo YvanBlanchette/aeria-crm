@@ -45,6 +45,14 @@ export default async function ItineraryBuilder({
               : " (boucle)"}
             {itinerary.ship && ` · ${itinerary.ship.cruiseLine.name}, ${itinerary.ship.name}`}
           </p>
+          <p className="text-sm mt-2">
+            <Link
+              href={`/bookings/new?itineraryId=${itinerary.id}`}
+              className="text-ocean hover:underline"
+            >
+              Créer une réservation à partir de cet itinéraire
+            </Link>
+          </p>
         </div>
         <form action={deleteAction}>
           <button className="btn-danger">Supprimer l&apos;itinéraire</button>

@@ -16,22 +16,41 @@ const STATUS_COLORS: Record<string, string> = {
 export default async function BookingsPage({
   searchParams,
 }: {
-  searchParams: { status?: string };
+  searchParams: { status?: string; itinerary?: string };
 }) {
   await requireUser();
   const status = searchParams.status;
+  const itineraryFilter =
+    searchParams.itinerary === "linked" || searchParams.itinerary === "unlinked"
+      ? searchParams.itinerary
+      : undefined;
+
+  const where: any = {};
+  if (status) where.status = status;
+  if (itineraryFilter === "linked") where.itineraryId = { not: null };
+  if (itineraryFilter === "unlinked") where.itineraryId = null;
+
   const bookings = await prisma.booking.findMany({
-    where: status ? { status: status as any } : undefined,
+    where,
     orderBy: { sailingDate: "desc" },
     include: { client: true, itinerary: { include: { ship: { include: { cruiseLine: true } } } } },
     take: 200,
   });
 
+  const makeHref = (nextStatus?: string, nextItinerary?: "linked" | "unlinked") => {
+    const params = new URLSearchParams();
+    if (nextStatus) params.set("status", nextStatus);
+    if (nextItinerary) params.set("itinerary", nextItinerary);
+    const query = params.toString();
+    return query ? `/bookings?${query}` : "/bookings";
+  };
+
   return (
     <div className="space-y-5">
+      {/* STATUS FILTERS */}
       <div className="flex gap-2 flex-wrap">
         <Link
-          href="/bookings"
+          href={makeHref(undefined, itineraryFilter as "linked" | "unlinked" | undefined)}
           className={`badge ${!status ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}
         >
           Toutes
@@ -39,12 +58,34 @@ export default async function BookingsPage({
         {Object.entries(BOOKING_STATUS_LABELS).map(([v, l]) => (
           <Link
             key={v}
-            href={`/bookings?status=${v}`}
+            href={makeHref(v, itineraryFilter as "linked" | "unlinked" | undefined)}
             className={`badge ${status === v ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}
           >
             {l}
           </Link>
         ))}
+      </div>
+
+      {/* ITINERARY LINK FILTERS */}
+      <div className="flex gap-2 flex-wrap">
+        <Link
+          href={makeHref(status, undefined)}
+          className={`badge ${!itineraryFilter ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}
+        >
+          Itinéraire: tous
+        </Link>
+        <Link
+          href={makeHref(status, "linked")}
+          className={`badge ${itineraryFilter === "linked" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}
+        >
+          Itinéraire: lié
+        </Link>
+        <Link
+          href={makeHref(status, "unlinked")}
+          className={`badge ${itineraryFilter === "unlinked" ? "bg-navy text-white" : "bg-white border border-slate-300 text-slate-600"}`}
+        >
+          Itinéraire: non lié
+        </Link>
       </div>
 
       <div className="card overflow-hidden">
