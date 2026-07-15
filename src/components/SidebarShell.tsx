@@ -110,15 +110,6 @@ export default function SidebarShell({
               />
             )}
           </Link>
-
-          <button
-            type="button"
-            onClick={onToggleCollapsed}
-            className="absolute right-0 top-1/2 -translate-y-1/2 inline-flex h-6 w-6 items-center justify-center rounded-l-lg text-white transition hover:bg-white/20"
-            aria-label={collapsed ? "Développer la barre latérale" : "Réduire la barre latérale"}
-          >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </button>
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">

@@ -12,6 +12,7 @@
     "build:clean": "npm run clean:next && npm run build",
     "start": "node .next/standalone/server.js",
     "postbuild:standalone": "node scripts/prepare-standalone.mjs",
+    "deploy:check": "node scripts/verify-deployment-assets.mjs",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
