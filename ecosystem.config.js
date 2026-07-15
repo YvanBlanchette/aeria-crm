@@ -3,8 +3,8 @@ module.exports = {
   apps: [
     {
       name: "cruise-crm",
-      script: "node_modules/next/dist/bin/next",
-      args: "start -p 3000",
+      // Next is built with output: "standalone", so run the generated server directly.
+      script: ".next/standalone/server.js",
       cwd: __dirname,
       instances: 1,
       exec_mode: "fork",
@@ -12,6 +12,8 @@ module.exports = {
       max_memory_restart: "512M",
       env: {
         NODE_ENV: "production",
+        PORT: "3000",
+        HOSTNAME: "0.0.0.0",
       },
     },
   ],
