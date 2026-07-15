@@ -36,10 +36,32 @@ const toBoundedInt = (v: FormDataEntryValue | null, fallback: number, min: numbe
   return Math.min(max, Math.max(min, Math.round(n)));
 };
 
+function redirectToSettings(
+  formData: FormData,
+  params: Record<string, string | number | boolean | undefined>,
+  fallbackTab: string,
+  fallbackSubtab?: string,
+) {
+  const tab = String(formData.get("returnTab") ?? fallbackTab);
+  const subtab = String(formData.get("returnSubtab") ?? fallbackSubtab ?? "");
+  const searchParams = new URLSearchParams();
+  searchParams.set("tab", tab);
+  if (subtab) searchParams.set("subtab", subtab);
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) continue;
+    searchParams.set(key, String(value));
+  }
+
+  redirect(`/settings?${searchParams.toString()}`);
+}
+
 export async function addCruiseLine(formData: FormData) {
   const me = await requireUser();
   const name = String(formData.get("name") ?? "").trim();
-  if (!name) return;
+  if (!name) {
+    redirectToSettings(formData, { data: "invalid" }, "data", "cruise-lines");
+  }
   await prisma.cruiseLine.upsert({ where: { name }, update: {}, create: { name } });
   await logSettingsEvent({
     actorUserId: me.id,
@@ -48,13 +70,16 @@ export async function addCruiseLine(formData: FormData) {
     target: "cruiseLine",
   });
   revalidatePath("/settings");
+  redirectToSettings(formData, { data: "updated" }, "data", "cruise-lines");
 }
 
 export async function addShip(formData: FormData) {
   const me = await requireUser();
   const name = String(formData.get("name") ?? "").trim();
   const cruiseLineId = String(formData.get("cruiseLineId") ?? "");
-  if (!name || !cruiseLineId) return;
+  if (!name || !cruiseLineId) {
+    redirectToSettings(formData, { data: "invalid" }, "data", "ships");
+  }
   await prisma.ship.create({ data: { name, cruiseLineId } });
   await logSettingsEvent({
     actorUserId: me.id,
@@ -63,11 +88,15 @@ export async function addShip(formData: FormData) {
     target: "ship",
   });
   revalidatePath("/settings");
+  redirectToSettings(formData, { data: "updated" }, "data", "ships");
 }
 
-export async function deleteShip(id: string) {
+export async function deleteShip(id: string, formData: FormData) {
   const me = await requireUser();
   const ship = await prisma.ship.findUnique({ where: { id }, select: { name: true } });
+  if (!ship) {
+    redirectToSettings(formData, { data: "invalid" }, "data", "ships");
+  }
   await prisma.ship.delete({ where: { id } });
   await logSettingsEvent({
     actorUserId: me.id,
@@ -76,6 +105,7 @@ export async function deleteShip(id: string) {
     target: "ship",
   });
   revalidatePath("/settings");
+  redirectToSettings(formData, { data: "updated" }, "data", "ships");
 }
 
 export async function createUser(formData: FormData) {
@@ -87,9 +117,13 @@ export async function createUser(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const role = String(formData.get("role") ?? "AGENT") as Role;
-  if (!email || !name || password.length < 8) return;
+  if (!email || !name || password.length < 8) {
+    redirectToSettings(formData, { team: "invalid" }, "team");
+  }
   const exists = await prisma.user.findUnique({ where: { email } });
-  if (exists) return;
+  if (exists) {
+    redirectToSettings(formData, { team: "invalid" }, "team");
+  }
   await prisma.user.create({
     data: { email, name, role, passwordHash: await bcrypt.hash(password, 10) },
   });
@@ -101,6 +135,7 @@ export async function createUser(formData: FormData) {
     metadata: { role },
   });
   revalidatePath("/settings");
+  redirectToSettings(formData, { team: "created" }, "team");
 }
 
 export async function saveAgencySettings(formData: FormData) {
@@ -108,7 +143,9 @@ export async function saveAgencySettings(formData: FormData) {
   if (me.role !== "ADMIN") return;
 
   const agencyName = String(formData.get("agencyName") ?? "").trim();
-  if (!agencyName) return;
+  if (!agencyName) {
+    redirectToSettings(formData, { saved: "invalid" }, "agency");
+  }
 
   const data = {
     agencyName,
@@ -159,7 +196,7 @@ export async function saveAgencySettings(formData: FormData) {
   });
 
   revalidatePath("/settings");
-  redirect("/settings?saved=1");
+  redirectToSettings(formData, { saved: 1 }, "agency");
 }
 
 export async function updateMyPassword(formData: FormData) {
@@ -169,14 +206,16 @@ export async function updateMyPassword(formData: FormData) {
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
   if (newPassword.length < 8 || newPassword !== confirmPassword) {
-    redirect("/settings?pwd=invalid");
+    redirectToSettings(formData, { pwd: "invalid" }, "profile");
   }
 
   const user = await prisma.user.findUnique({ where: { id: me.id } });
-  if (!user) redirect("/login");
+  if (!user) {
+    redirectToSettings(formData, { pwd: "wrong" }, "profile");
+  }
 
   const ok = await bcrypt.compare(currentPassword, user.passwordHash);
-  if (!ok) redirect("/settings?pwd=wrong");
+  if (!ok) redirectToSettings(formData, { pwd: "wrong" }, "profile");
 
   await prisma.user.update({
     where: { id: me.id },
@@ -191,7 +230,7 @@ export async function updateMyPassword(formData: FormData) {
   });
 
   revalidatePath("/settings");
-  redirect("/settings?pwd=updated");
+  redirectToSettings(formData, { pwd: "updated" }, "profile");
 }
 
 export async function resetUserPassword(userId: string, formData: FormData) {
@@ -201,17 +240,19 @@ export async function resetUserPassword(userId: string, formData: FormData) {
   const newPassword = String(formData.get("newPassword") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
   if (newPassword.length < 8) {
-    redirect("/settings?teamPwd=invalid");
+    redirectToSettings(formData, { teamPwd: "invalid" }, "team");
   }
   if (newPassword !== confirmPassword) {
-    redirect("/settings?teamPwd=mismatch");
+    redirectToSettings(formData, { teamPwd: "mismatch" }, "team");
   }
 
   const targetUser = await prisma.user.findUnique({
     where: { id: userId },
     select: { email: true },
   });
-  if (!targetUser) return;
+  if (!targetUser) {
+    redirectToSettings(formData, { teamPwd: "invalid" }, "team");
+  }
 
   await prisma.user.update({
     where: { id: userId },
@@ -226,5 +267,5 @@ export async function resetUserPassword(userId: string, formData: FormData) {
   });
 
   revalidatePath("/settings");
-  redirect("/settings?teamPwd=updated");
+  redirectToSettings(formData, { teamPwd: "updated" }, "team");
 }

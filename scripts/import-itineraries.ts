@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { parse } from "csv-parse/sync";
 import { PrismaClient, ItinerarySource } from "@prisma/client";
+import "dotenv/config";
 
 const prisma = new PrismaClient();
 

@@ -1,5 +1,6 @@
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import "dotenv/config";
 import { importItineraries } from "./import-itineraries";
 
 function run(command: string, args: string[], label: string) {

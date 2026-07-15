@@ -1,5 +1,5 @@
-import LoginPage from "../login/page";
+import SignInView from "./SignInView";
 
 export default function SignInPage() {
-  return <LoginPage />;
+  return <SignInView />;
 }

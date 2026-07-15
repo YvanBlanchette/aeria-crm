@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 const PAGE_CONFIG: Array<{
   match: (pathname: string) => boolean;
@@ -57,7 +58,12 @@ const PAGE_CONFIG: Array<{
   },
 ];
 
-export default function Navbar() {
+type NavbarProps = {
+  isSidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
+};
+
+export default function Navbar({ isSidebarCollapsed = false, onToggleSidebar }: NavbarProps) {
   const pathname = usePathname();
   const current: {
     title: string;
@@ -72,9 +78,27 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-30 shadow-lg bg-white/90 backdrop-blur">
       <div className="px-6 lg:px-8 py-4 flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-navy">{current.title}</h1>
-          {current.subtitle && <p className="text-sm text-slate-500 mt-1">{current.subtitle}</p>}
+        <div className="flex items-start gap-3">
+          {onToggleSidebar && (
+            <button
+              type="button"
+              onClick={onToggleSidebar}
+              className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100 hover:text-navy"
+              aria-label={
+                isSidebarCollapsed ? "Développer la barre latérale" : "Réduire la barre latérale"
+              }
+            >
+              {isSidebarCollapsed ? (
+                <PanelLeftOpen className="h-4 w-4" />
+              ) : (
+                <PanelLeftClose className="h-4 w-4" />
+              )}
+            </button>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold text-navy">{current.title}</h1>
+            {current.subtitle && <p className="text-sm text-slate-500 mt-1">{current.subtitle}</p>}
+          </div>
         </div>
         {current.actionHref && current.actionLabel && (
           <Link href={current.actionHref} className="btn-primary">

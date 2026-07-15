@@ -4,16 +4,21 @@ import Link from "next/link";
 const Logo = ({
   className = "",
   href = "/dashboard",
-  variant = "white",
+  variant,
 }: {
   className?: string;
   href?: string;
-  variant?: "white" | "black";
+  variant?: string;
 }) => {
+  const imageURL =
+    variant === "white"
+      ? "/images/logos/aeria-logo_white.svg"
+      : "/images/logos/aeria-logo_black.svg";
+
   return (
     <Link href={href} className={`flex items-center gap-2 ${className}`}>
       <Image
-        src={`/images/logos/aeria-logo_${variant}.svg`}
+        src={imageURL}
         alt="AERIA Voyages Academy"
         width={409}
         height={80}

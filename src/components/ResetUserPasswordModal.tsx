@@ -5,9 +5,11 @@ import { useEffect, useRef, useState } from "react";
 export function ResetUserPasswordModal({
   userLabel,
   action,
+  returnTab = "team",
 }: {
   userLabel: string;
   action: (formData: FormData) => void | Promise<void>;
+  returnTab?: string;
 }) {
   const [open, setOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -41,6 +43,7 @@ export function ResetUserPasswordModal({
             <p className="mt-2 text-sm text-slate-600">Utilisateur: {userLabel}</p>
 
             <form ref={formRef} action={action} className="mt-4 space-y-3">
+              <input type="hidden" name="returnTab" value={returnTab} />
               <div>
                 <label className="label" htmlFor="reset-newPassword">
                   Nouveau mot de passe

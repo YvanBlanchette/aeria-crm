@@ -41,14 +41,14 @@ export async function getSessionUserId(): Promise<string | null> {
   }
 }
 
-/** Récupère l'utilisateur courant ou redirige vers /login. */
+/** Récupère l'utilisateur courant ou redirige vers /signin. */
 export async function requireUser() {
   const userId = await getSessionUserId();
-  if (!userId) redirect("/login");
+  if (!userId) redirect("/signin");
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, name: true, email: true, role: true },
   });
-  if (!user) redirect("/login");
+  if (!user) redirect("/signin");
   return user;
 }

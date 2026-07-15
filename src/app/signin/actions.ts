@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { createSession } from "@/lib/auth";
 
-export async function login(_prev: { error?: string } | undefined, formData: FormData) {
+export async function signin(_prev: { error?: string } | undefined, formData: FormData) {
   const email = String(formData.get("email") ?? "")
     .trim()
     .toLowerCase();
@@ -13,11 +13,28 @@ export async function login(_prev: { error?: string } | undefined, formData: For
 
   if (!email || !password) return { error: "Courriel et mot de passe requis." };
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  let user: {
+    id: string;
+    passwordHash: string;
+  } | null = null;
+  try {
+    user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, passwordHash: true },
+    });
+  } catch {
+    return { error: "Le service de connexion est temporairement indisponible." };
+  }
+
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     return { error: "Identifiants invalides." };
   }
 
-  await createSession(user.id);
+  try {
+    await createSession(user.id);
+  } catch {
+    return { error: "Connexion impossible pour le moment. Reessayez." };
+  }
+
   redirect("/dashboard");
 }

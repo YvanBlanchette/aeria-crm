@@ -1,6 +1,7 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import "dotenv/config";
 import { normalizeDatasetPayload, slugFromFilename } from "../src/lib/datasets";
 
 const prisma = new PrismaClient();

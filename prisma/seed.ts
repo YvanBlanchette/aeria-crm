@@ -1,6 +1,7 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { readdir, readFile } from "node:fs/promises";
+import "dotenv/config";
 import path from "node:path";
 import { normalizeDatasetPayload, slugFromFilename } from "../src/lib/datasets";
 
