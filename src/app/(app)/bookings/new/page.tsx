@@ -12,11 +12,15 @@ export default async function NewBookingPage({
   searchParams: { clientId?: string; itineraryId?: string };
 }) {
   await requireUser();
-  const [clients, itineraries] = await Promise.all([
+  const [clients, itineraries, cruiseLines] = await Promise.all([
     prisma.client.findMany({ orderBy: { lastName: "asc" }, take: 500 }),
     prisma.itinerary.findMany({
       orderBy: { name: "asc" },
       include: { ship: { include: { cruiseLine: true } } },
+    }),
+    prisma.cruiseLine.findMany({
+      orderBy: { name: "asc" },
+      include: { ships: { orderBy: { name: "asc" } } },
     }),
   ]);
 
@@ -34,6 +38,10 @@ export default async function NewBookingPage({
         defaultClientId={searchParams.clientId}
         defaultItineraryId={searchParams.itineraryId}
         clients={clients.map((c) => ({ id: c.id, label: `${c.lastName}, ${c.firstName}` }))}
+        cruiseCatalog={cruiseLines.map((line) => ({
+          name: line.name,
+          ships: line.ships.map((ship) => ship.name),
+        }))}
         itineraries={itineraries.map((i) => ({
           id: i.id,
           label: `${i.name}${i.ship ? ` — ${i.ship.name}` : ""} (${i.nights} nuits)`,

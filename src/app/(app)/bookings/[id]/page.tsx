@@ -49,6 +49,7 @@ export default async function BookingDetail({
   const balance = Number(booking.totalPrice) - Number(booking.deposit ?? 0);
 
   let clientOptions: { id: string; label: string }[] = [];
+  let cruiseCatalog: { name: string; ships: string[] }[] = [];
   let itineraryOptions: {
     id: string;
     label: string;
@@ -59,14 +60,22 @@ export default async function BookingDetail({
     cruiseLineName?: string | null;
   }[] = [];
   if (editing) {
-    const [clients, itineraries] = await Promise.all([
+    const [clients, itineraries, cruiseLines] = await Promise.all([
       prisma.client.findMany({ orderBy: { lastName: "asc" }, take: 500 }),
       prisma.itinerary.findMany({
         orderBy: { name: "asc" },
         include: { ship: { include: { cruiseLine: true } } },
       }),
+      prisma.cruiseLine.findMany({
+        orderBy: { name: "asc" },
+        include: { ships: { orderBy: { name: "asc" } } },
+      }),
     ]);
     clientOptions = clients.map((c) => ({ id: c.id, label: `${c.lastName}, ${c.firstName}` }));
+    cruiseCatalog = cruiseLines.map((line) => ({
+      name: line.name,
+      ships: line.ships.map((ship) => ship.name),
+    }));
     itineraryOptions = itineraries.map((i) => ({
       id: i.id,
       label: `${i.name}${i.ship ? ` — ${i.ship.name}` : ""} (${i.nights} nuits)`,
@@ -120,6 +129,7 @@ export default async function BookingDetail({
           submitLabel="Enregistrer"
           lockClient
           clients={clientOptions}
+          cruiseCatalog={cruiseCatalog}
           itineraries={itineraryOptions}
         />
       ) : (

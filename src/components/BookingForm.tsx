@@ -13,6 +13,10 @@ type ItineraryOption = {
   shipName?: string | null;
   cruiseLineName?: string | null;
 };
+type CruiseCatalogOption = {
+  name: string;
+  ships: string[];
+};
 
 type SegmentType =
   | "CRUISE"
@@ -328,6 +332,7 @@ const SEGMENT_LABELS: Record<SegmentType, string> = {
 export function BookingForm({
   clients,
   itineraries,
+  cruiseCatalog,
   booking,
   action,
   submitLabel,
@@ -337,6 +342,7 @@ export function BookingForm({
 }: {
   clients: Option[];
   itineraries?: ItineraryOption[];
+  cruiseCatalog?: CruiseCatalogOption[];
   booking?: BookingLike;
   action: (fd: FormData) => void;
   submitLabel: string;
@@ -391,6 +397,17 @@ export function BookingForm({
 
   const [payments, setPayments] = useState<PaymentDraft[]>(initialPayments);
   const [schedules, setSchedules] = useState<PaymentScheduleDraft[]>(initialSchedules);
+
+  const sortedCruiseCatalog = useMemo(
+    () =>
+      (cruiseCatalog ?? [])
+        .map((line) => ({
+          ...line,
+          ships: [...line.ships].sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" })),
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name, "fr", { sensitivity: "base" })),
+    [cruiseCatalog],
+  );
 
   useEffect(() => {
     if (!selectedItinerary || !globalDepartureDate || globalReturnDate) return;
@@ -467,6 +484,27 @@ export function BookingForm({
   const updateSegmentDetail = (index: number, key: string, value: string) => {
     setSegments((prev) =>
       prev.map((s, i) => (i === index ? { ...s, details: { ...s.details, [key]: value } } : s)),
+    );
+  };
+
+  const updateCruiseLine = (index: number, cruiseLine: string) => {
+    setSegments((prev) =>
+      prev.map((segment, i) => {
+        if (i !== index) return segment;
+
+        const ships = sortedCruiseCatalog.find((item) => item.name === cruiseLine)?.ships ?? [];
+        const currentShip = segment.details.shipName ?? "";
+        const nextShip = ships.includes(currentShip) ? currentShip : (ships[0] ?? "");
+
+        return {
+          ...segment,
+          details: {
+            ...segment.details,
+            cruiseLine,
+            shipName: nextShip,
+          },
+        };
+      }),
     );
   };
 
@@ -954,19 +992,47 @@ export function BookingForm({
                 <>
                   <div>
                     <label className="label">Compagnie croisière</label>
-                    <input
+                    <select
                       className="input"
                       value={segment.details.cruiseLine ?? ""}
-                      onChange={(e) => updateSegmentDetail(index, "cruiseLine", e.target.value)}
-                    />
+                      onChange={(e) => updateCruiseLine(index, e.target.value)}
+                    >
+                      <option value="">Choisir une compagnie...</option>
+                      {sortedCruiseCatalog.map((line) => (
+                        <option key={line.name} value={line.name}>
+                          {line.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="label">Navire</label>
-                    <input
+                    <select
                       className="input"
+                      disabled={!segment.details.cruiseLine}
                       value={segment.details.shipName ?? ""}
                       onChange={(e) => updateSegmentDetail(index, "shipName", e.target.value)}
-                    />
+                    >
+                      <option value="">
+                        {segment.details.cruiseLine
+                          ? "Choisir un navire..."
+                          : "Choisir d'abord une compagnie"}
+                      </option>
+                      {(
+                        sortedCruiseCatalog.find(
+                          (item) => item.name === (segment.details.cruiseLine ?? ""),
+                        )?.ships ?? []
+                      ).map((ship) => (
+                        <option key={ship} value={ship}>
+                          {ship}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {segment.details.cruiseLine
+                        ? "Le premier navire est sélectionné automatiquement; vous pouvez le changer."
+                        : "Sélectionnez d'abord une compagnie pour activer la liste des navires."}
+                    </p>
                   </div>
                   <div>
                     <label className="label">Catégorie cabine</label>
