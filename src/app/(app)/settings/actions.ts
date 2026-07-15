@@ -210,11 +210,13 @@ export async function updateMyPassword(formData: FormData) {
   }
 
   const user = await prisma.user.findUnique({ where: { id: me.id } });
-  if (!user) {
+  const passwordHash = user?.passwordHash;
+  if (!passwordHash) {
     redirectToSettings(formData, { pwd: "wrong" }, "profile");
+    return;
   }
 
-  const ok = await bcrypt.compare(currentPassword, user.passwordHash);
+  const ok = await bcrypt.compare(currentPassword, passwordHash);
   if (!ok) redirectToSettings(formData, { pwd: "wrong" }, "profile");
 
   await prisma.user.update({
@@ -250,8 +252,10 @@ export async function resetUserPassword(userId: string, formData: FormData) {
     where: { id: userId },
     select: { email: true },
   });
-  if (!targetUser) {
+  const targetUserEmail = targetUser?.email;
+  if (!targetUserEmail) {
     redirectToSettings(formData, { teamPwd: "invalid" }, "team");
+    return;
   }
 
   await prisma.user.update({
@@ -262,7 +266,7 @@ export async function resetUserPassword(userId: string, formData: FormData) {
   await logSettingsEvent({
     actorUserId: me.id,
     action: "team_password_reset",
-    summary: `Réinitialisation du mot de passe: ${targetUser.email}`,
+    summary: `Réinitialisation du mot de passe: ${targetUserEmail}`,
     target: "user",
   });
 
