@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { pathToFileURL } from "node:url";
 import path from "node:path";
 import { parse } from "csv-parse/sync";
 import { PrismaClient, ItinerarySource } from "@prisma/client";
@@ -246,17 +247,23 @@ export async function importItineraries(csvPathInput?: string): Promise<ImportSu
   };
 }
 
+export async function disconnectItinerariesImporter() {
+  await prisma.$disconnect();
+}
+
 async function main() {
   const summary = await importItineraries(process.argv[2]);
   console.log("Itineraries import complete:");
   console.log(JSON.stringify(summary, null, 2));
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main()
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}

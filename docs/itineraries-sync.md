@@ -20,7 +20,15 @@ npm run itineraries:import
 npm run itineraries:sync
 ```
 
-Optional Python command override (if `py -3` or `python3` differs):
+Python dependencies:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+```
+
+The sync command auto-detects `.venv/bin/python` on Linux and `.venv\Scripts\python.exe` on Windows. Optional Python command override (if needed):
 
 ```bash
 ITINERARIES_PYTHON="python" npm run itineraries:sync
@@ -41,6 +49,21 @@ Query params:
 - `limit`: defaults to `20`, max `100`
 
 ## Production Schedule (Linux VPS)
+
+Before the first run after deploy:
+
+```bash
+cd /var/www/aeria-crm
+git pull
+npm ci
+npx prisma migrate deploy
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+npm run itineraries:sync
+```
+
+Make sure `DATABASE_URL` in `.env` points to the VPS PostgreSQL database and that PostgreSQL is running before the import starts. The sync retries briefly while the database is starting.
 
 Use cron for daily sync at 03:30.
 
